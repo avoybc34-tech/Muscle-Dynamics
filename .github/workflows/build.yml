@@ -33,6 +33,10 @@ env:
   EXPO_PUBLIC_API_URL: ${{ inputs.backend_url || vars.EXPO_PUBLIC_API_URL || '' }}
   ACK_TEST_BUILDS: ${{ inputs.acknowledge_test_builds }}
 
+defaults:
+  run:
+    working-directory: mobile
+
 jobs:
   checks:
     name: Validate source and report security status
@@ -46,6 +50,7 @@ jobs:
         with:
           node-version: '22.23.3'
           cache: npm
+          cache-dependency-path: mobile/package-lock.json
       - name: Validate inputs (test builds only)
         run: node scripts/ci-config.mjs
       - run: npm ci --include=dev
@@ -56,7 +61,7 @@ jobs:
       - uses: actions/upload-artifact@v6
         with:
           name: security-audit-and-status
-          path: reports/
+          path: mobile/reports/
           retention-days: 7
           if-no-files-found: error
 
@@ -74,6 +79,7 @@ jobs:
         with:
           node-version: '22.23.3'
           cache: npm
+          cache-dependency-path: mobile/package-lock.json
       - uses: actions/setup-java@v5
         with:
           distribution: temurin
@@ -84,7 +90,7 @@ jobs:
       - uses: actions/upload-artifact@v6
         with:
           name: Muscle-Dynamics-Android-TEST-APK
-          path: artifacts/android/
+          path: mobile/artifacts/android/
           if-no-files-found: error
           retention-days: 7
           compression-level: 0
@@ -93,7 +99,7 @@ jobs:
         uses: actions/upload-artifact@v6
         with:
           name: android-build-logs
-          path: build-logs/
+          path: mobile/build-logs/
           if-no-files-found: ignore
           retention-days: 7
 
@@ -111,13 +117,14 @@ jobs:
         with:
           node-version: '22.23.3'
           cache: npm
+          cache-dependency-path: mobile/package-lock.json
       - run: npm ci --include=dev
       - name: Build device archive WITHOUT Apple signing
         run: bash scripts/build-ios-unsigned.sh
       - uses: actions/upload-artifact@v6
         with:
           name: Muscle-Dynamics-iPhone-UNSIGNED-IPA
-          path: artifacts/ios/
+          path: mobile/artifacts/ios/
           if-no-files-found: error
           retention-days: 7
           compression-level: 0
@@ -126,6 +133,6 @@ jobs:
         uses: actions/upload-artifact@v6
         with:
           name: ios-build-logs
-          path: build-logs/
+          path: mobile/build-logs/
           if-no-files-found: ignore
           retention-days: 7

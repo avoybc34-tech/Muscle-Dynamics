@@ -1,0 +1,10 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {applyRuntimeEnvironment} from '../lib/runtime-env.js';
+const parts=()=>({DB_HOST:'private-db.internal',DB_USER:'muscle_app',DB_PASSWORD:'a+/:@?%#=secret',NODE_ENV:'production',RENDER_EXTERNAL_URL:'https://muscle-example.onrender.com/'});
+test('private MariaDB credentials are encoded and Render URL becomes canonical origin',()=>{const e=applyRuntimeEnvironment(parts());const u=new URL(e.DATABASE_URL);assert.equal(decodeURIComponent(u.password),'a+/:@?%#=secret');assert.equal(u.hostname,'private-db.internal');assert.equal(u.pathname,'/muscle_dynamics');assert.equal(u.searchParams.get('connection_limit'),'8');assert.equal(e.APP_URL,'https://muscle-example.onrender.com');});
+test('explicit external MariaDB URL and custom domain stay supported',()=>{const e={DATABASE_URL:'mysql://x:y@db.example.invalid/gym',APP_URL:'https://gym.example.invalid/',NODE_ENV:'production'};applyRuntimeEnvironment(e);assert.equal(e.APP_URL,'https://gym.example.invalid');assert.equal(e.DATABASE_URL,'mysql://x:y@db.example.invalid/gym');});
+test('Render hostname fallback works without external URL',()=>{const e=parts();delete e.RENDER_EXTERNAL_URL;e.RENDER_EXTERNAL_HOSTNAME='gym.onrender.com';applyRuntimeEnvironment(e);assert.equal(e.APP_URL,'https://gym.onrender.com');});
+test('missing credentials and malformed hosts/ports are rejected without echoing secrets',()=>{for(const changed of [{DB_PASSWORD:''},{DB_HOST:'host/secret'},{DB_PORT:'0'},{DB_PORT:'3306x'},{DB_NAME:'gym;DROP'}])assert.throws(()=>applyRuntimeEnvironment({...parts(),...changed}));});
+test('PostgreSQL cannot silently replace selected MariaDB',()=>assert.throws(()=>applyRuntimeEnvironment({DATABASE_URL:'postgresql://a:b@host/gym'}),/MariaDB/));
+test('production origin rejects HTTP, credentials, paths and query tokens',()=>{for(const APP_URL of ['http://gym.example.invalid','https://u:p@gym.example.invalid','https://gym.example.invalid/admin.html','https://gym.example.invalid/?token=x'])assert.throws(()=>applyRuntimeEnvironment({...parts(),APP_URL}));});

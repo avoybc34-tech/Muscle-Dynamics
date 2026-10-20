@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#111a27" />
+    <title>Member space — Muscle Dynamics</title>
+    <link rel="icon" href="/assets/favicon.svg" />
+    <link rel="stylesheet" href="/css/site.css" />
+  </head>
+  <body>
+    <div id="file-warning" hidden><strong>Use your hosted Render website.</strong> This page needs the included server and database. Open your deployed HTTPS Render URL, not a downloaded HTML file. See START-HERE.html in the full project ZIP.</div>
+    <script>
+      if (location.protocol === "file:")
+        document.getElementById("file-warning").hidden = false;
+    </script>
+    <div id="app">
+      <div class="loading-screen">Opening your member space…</div>
+    </div>
+    <script type="module" src="/js/member.js"></script>
+  </body>
+</html>

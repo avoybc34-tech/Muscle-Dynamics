@@ -1,40 +1,34 @@
-# Verification — clean GitHub build project
+# Full-project verification — 20 October 2026
 
-Prepared 20 October 2026. This is a new standalone mobile source repository. The older website/MariaDB project and previously delivered ZIPs were not deleted or modified by this cleanup.
+## Scope
 
-## Checks actually executed
-- Matching lockfile regenerated and `npm ci` completed.
-- `npm run typecheck` passed.
-- **10 / 10** build/configuration tests passed: backend input handling, acknowledgement, explicit Android test signing, matching identifiers, framework versions, workflow safety, unsigned iOS flags and ignored private/native files.
-- `npx expo install --check`: dependencies aligned.
-- **Expo Doctor 20 / 20** checks passed.
-- **iOS and Android JavaScript/asset exports** passed. These exports are NOT signed native binaries.
-- **Android Expo prebuild** passed. Generated template inspected: release signing uses `signingConfigs.debug`; debug keystore is present; Gradle wrapper is 9.4.1. Native output excluded from source ZIP.
-- **iOS Expo prebuild** passed on Linux with `--no-install`; generated target/project is `MuscleDynamics` and Podfile is generated. CocoaPods/Xcode compilation cannot be tested on this Linux workspace. Generated output excluded from source ZIP.
-- Workflow parsed as YAML and **actionlint 1.7.12** passed; workflow has three jobs and manual inputs.
-- Both build shell scripts passed `bash -n` syntax checking.
-- Current dependency audit saved locally: **15 high**, 0 moderate, 0 critical package-chain findings. This is NOT a clean security audit. See SECURITY.md.
+This is the complete Render website/API/private-MariaDB repository with the mobile source and repository-root GitHub build workflow. It replaces the earlier app-only ZIP as the combined deliverable. No Render resources, GitHub repository or cloud build jobs have been created for you. No deployment charges have been approved.
 
-## Not executed / not claimed
-- No repository created or upload/commit/push in your GitHub account.
-- No GitHub-hosted job executed, no GitHub billable runner started by the assistant.
-- No complete Android native compilation or physical-device APK install performed here.
-- No macOS CocoaPods install/Xcode archive, generated IPA, Apple signing, provisioning, iPhone installation, TestFlight or store upload performed here.
-- No Expo/EAS account, Apple account, signing key, database password or hosted backend access used.
-- No security certification, production acceptance, legal review or backend deployment.
+## Checks completed in the preparation environment
 
-The workflow is prepared and locally checked, not represented as a successfully completed remote native build. If the runner/native toolchain reports a new failure, download its logs artifact and share the first actual error section (without secrets).
+- Node 22.23.3; real MariaDB 11.8.6.
+- Website/backend: **35/35 tests passed**, including real MariaDB integration tests, separate SQL-baseline import/schema comparison, payment review/renewal/concurrency/authorization rules and six runtime-environment checks. Integration fixtures use random disposable `_test` databases and are not shipped as business data.
+- Render build script: clean dependency install and optimized Next production build succeeded **without a running database**. A build-only placeholder URL is passed to build child processes; it is not configured as the production database.
+- Automatic startup tested with `DB_HOST`/`DB_PORT`/`DB_USER`/`DB_PASSWORD`/`DB_NAME` and no supplied `DATABASE_URL`: readiness wait, initial migration and web startup succeeded. Runtime password URL encoding and Render URL fallback have unit tests.
+- Repeat startup migration: `migrate deploy` reported no pending migrations; no destructive seed/reset was run.
+- Fresh application DB checks: **0 users, 0 plans, 0 payment accounts, 0 payment requests, 0 memberships and 0 stored files**. The initialized schema does not supply invented business records.
+- Production HTTP smoke checks: `/api/health` returned `{"ok":true,"service":"Muscle Dynamics"}`; setup status correctly reported no owner.
+- Chromium browser checks: desktop and 390px mobile homepage, member login/signup gating, and initial owner setup/admin routing. Local stock photo and fonts rendered. Expected signed-out `/api/me` 401 responses are authentication probes, not a successful login or unexpected JS exception. No real owner credentials or accounts were entered in browser QA.
+- Mobile: TypeScript, dependency alignment and **11/11 tests passed**, including the monorepo workflow working-directory/cache/artifact paths.
+- Expo Doctor: **20/20 checks passed**. Android and iOS Hermes JavaScript exports succeeded from the combined mobile folder.
+- Workflow: actionlint 1.7.12 passed after moving it to the repository root. YAML structure checks confirm manual dispatch, three jobs, mobile lockfile cache paths and root-relative mobile artifact paths. Native build scripts pass shell syntax checks.
+- Render YAML: structure/wiring checks confirm two same-region services, private DB host/password references, and separate database/receipt persistent disks. These checks do **not** replace Render's account-side Blueprint validation and actual deployment.
+- Website/backend dependency audit: **0 reported vulnerabilities** in the resolved root dependency graph at check time.
+- Mobile dependency audit: **15 high / 0 moderate / 0 critical** package-chain findings at check time. The mobile graph is separate from the root graph. See `mobile/SECURITY.md`; CI records the current report and requires test-build acknowledgement. No unsafe forced dependency downgrade was applied.
 
-## Native outputs and honest labels
-- Android job invokes **assembleRelease**, verifies embedded JS and checks APK signatures with the Android SDK's apksigner. Its key is the public template test/debug key, NOT a production key. Output is for ARM64/ARMv7 Android phones.
-- iOS job targets `generic/platform=iOS`, disables signing explicitly, checks the release JS bundle and refuses an unexpected embedded provisioning profile. It ZIP-packages Payload as an **UNSIGNED** device IPA, not a simulator build. That IPA is not normally installable until separately signed/provisioned.
-- No Apple/Expo signing secrets are requested by this workflow. A valid separate signing route is still required for iPhone installation.
-- Every run requires explicit acknowledgement of test-only status and unresolved advisories. No automatic downgrade, force peer resolution or store publication occurs.
+## Not verified / not promised
 
-## External toolchain references checked
-- GitHub runner image: https://github.com/actions/runner-images/blob/main/images/macos/macos-26-arm64-Readme.md (listed Xcode 26.6, CocoaPods 1.17 and Node 22.23.3 at inspection).
-- Ubuntu runner image: https://github.com/actions/runner-images/blob/main/images/ubuntu/Ubuntu2404-Readme.md (Android SDK tooling and Java installations).
-- Official action descriptors: actions/checkout v5, actions/setup-node v5, actions/setup-java v5, actions/upload-artifact v6. Descriptors were fetched and inspected; selected actions run on Node 24. App build Node is separately pinned to 22.23.3.
-- RN/Expo native templates were read from the installed locked dependencies; do not assume an arbitrary older SDK has identical signing/build behavior.
+- A real Render deployment, provider billing/availability, container resource usage under production load, custom-domain DNS, and off-service backup/restore are not executed here. The MariaDB Dockerfile targets the upstream 11.8 image; the hosted container still needs its real Render start.
+- GitHub-hosted Android Gradle and macOS/Xcode native compilation still need to run in your repository/account. Successful JavaScript exports and workflow lint are **not** successful APK/IPA compilation.
+- No native binary is included in this source ZIP. Workflow artifacts are generated only after successful native jobs. No physical Android/iPhone testing has been performed.
+- APK is test-signed with a publicly known key, not store/production signing. IPA is unsigned and not normally directly installable. No Apple/Expo account, private signing key or release credential is bundled.
+- No automatic bank/wallet settlement, recurring billing, automatic refunds, production security certification, push/email messaging or automated account deletion is claimed.
 
-Runner images/tool availability and GitHub plans can change. Costs, quotas, account verification, repository privacy, signing and release review remain the owner's responsibility.
+## Package hygiene
+
+The release source allowlist excludes private `.env`, dependency/build caches, native generated projects, receipts/uploads, test artifacts, local databases, signing secrets and binaries. `SOURCE-SHA256.txt` lists the included source files; the ZIP checksum is supplied beside the archive. The `.env.example` files contain placeholders only. Preserve the two package lockfiles and the root workflow during browser upload.

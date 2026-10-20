@@ -1,19 +1,11 @@
-# Test builds, not production security approval
+# Security / operational readiness
 
-Latest checked dependency graph reports **15 high**, 0 moderate, 0 critical package-chain findings. Counts may change; every workflow run saves the current `npm audit` JSON and a visible summary.
-
-Known upstream roots at preparation time:
-- `braces <=3.0.3`: nested-pattern stack-exhaustion DoS (GHSA-vfj7-8cjw-p6xm), affecting Metro/micromatch/React Native/Expo tooling chains.
-- `node-forge <=1.4.0`: RSA signature-verification issue (GHSA-86w9-cpqp-85rv), affecting Expo CLI/signing tooling chains.
-
-No compatible patched release was available in those lines at the earlier inspection. The automatic force suggestion downgraded Expo/RN to an incompatible set and was NOT applied. This new repository also does not run `audit fix --force` or `--legacy-peer-deps`, falsify the audit, or hide failed dependency checks. Developer review/compatible fixes remain required. Avoid exposing Metro to untrusted networks or accepting untrusted signing inputs. No claim is made that tooling placement makes advisories harmless.
-
-Other controls:
-- Workflow dispatch only, explicit test acknowledgement, read-only repository permissions, and no persisted checkout credentials.
-- No Apple/Expo login or signing secrets requested. No automatic store upload or publishing.
-- Source is freshly checked out and installed from the lockfile; generated native projects are not committed.
-- APK signing is checked and deliberately labelled **public test key**, not a production identity. IPA signing is disabled and labelled **UNSIGNED**.
-- API input accepts only a public HTTPS origin without credentials/query/path/newlines; the URL is compiled public configuration, not a place for secrets.
-- Local environments, native outputs, signing keys and credentials are ignored; the delivered source ZIP contains no such secrets.
-
-Before production: resolve/review advisories, set an owned app identity/private signing, test both platforms physically, implement any store-required account-deletion/privacy flows, configure the actual secured backend, and review gym legal/payment/retention policies. No account-deletion automation, push/email notifications or card gateway was added in this build-cleanup task.
+- Fresh source only: no private `.env`, real database records, uploaded proofs, user accounts, credentials, Apple keys or Android release signing keys are included.
+- All website, owner/member and app sessions use the shared MariaDB backend. Website cookies are HttpOnly/SameSite with production Secure cookies; app access tokens are stored in platform secure storage. Use HTTPS, strong unique owner credentials and restricted staff permissions. Do not expose the private DB port to the public internet.
+- The initial bootstrap token must be kept private, used once for the first owner, and removed after setup. The package contains no default owner password or public setup token.
+- Manual payment approval is an administrative decision, not payment-gateway confirmation. Independently verify bank/wallet/cash funds before approving. Receipts alone do not prove settlement.
+- Keep database AND receipt backups off-service and test recovery. A Render disk is persistence, not a complete backup plan. Self-hosted MariaDB needs monitoring, updates, backups and coordinated credential rotation.
+- Review dependency reports before launch and apply supported updates with regression tests. The root web/backend and mobile have separate dependency trees. Root audit results do not clear mobile advisories.
+- Mobile has unresolved high-severity upstream build-toolchain advisories recorded in verification. CI publishes a report but deliberately does not pretend audit success. Android uses a public test key; iOS IPA has no signing/provisioning. Neither is approved as production/store-ready.
+- Do not publish raw error logs containing secrets or private user data. Never place DB credentials in `EXPO_PUBLIC_*`, HTML/JS, workflow inputs, or screenshots. The only public mobile environment value should be the website HTTPS origin.
+- Native cloud builds, real devices, Render service creation and a complete production penetration test have not been performed here. Complete those checks before accepting real customer records or payments.

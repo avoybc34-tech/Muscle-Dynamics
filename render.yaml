@@ -1,0 +1,65 @@
+# FULL PLATFORM. Review charges BEFORE Apply: two paid services and two persistent disks.
+# No local npm, local database URL or manual SQL import is needed for a fresh Render deployment.
+services:
+  - type: pserv
+    name: muscle-dynamics-db
+    runtime: docker
+    region: oregon
+    plan: 0.5c-512mb
+    numInstances: 1
+    dockerfilePath: ./docker/mariadb/Dockerfile
+    dockerContext: ./docker/mariadb
+    disk:
+      name: mariadb-data
+      mountPath: /var/lib/mysql
+      sizeGB: 10
+    envVars:
+      - key: MARIADB_DATABASE
+        value: muscle_dynamics
+      - key: MARIADB_USER
+        value: muscle_app
+      - key: MARIADB_PASSWORD
+        generateValue: true
+      - key: MARIADB_ROOT_HOST
+        value: localhost
+      - key: MARIADB_ROOT_PASSWORD
+        generateValue: true
+
+  - type: web
+    name: muscle-dynamics-web
+    runtime: node
+    region: oregon
+    plan: 1c-2g
+    numInstances: 1
+    buildCommand: node scripts/render-build.mjs
+    startCommand: node scripts/render-start.mjs
+    healthCheckPath: /api/health
+    disk:
+      name: private-receipts
+      mountPath: /var/data/muscle-dynamics
+      sizeGB: 10
+    envVars:
+      - key: NODE_VERSION
+        value: 22.23.3
+      - key: NODE_ENV
+        value: production
+      - key: DB_HOST
+        fromService:
+          name: muscle-dynamics-db
+          type: pserv
+          property: host
+      - key: DB_PORT
+        value: '3306'
+      - key: DB_NAME
+        value: muscle_dynamics
+      - key: DB_USER
+        value: muscle_app
+      - key: DB_PASSWORD
+        fromService:
+          name: muscle-dynamics-db
+          type: pserv
+          envVarKey: MARIADB_PASSWORD
+      - key: BOOTSTRAP_TOKEN
+        generateValue: true
+      - key: UPLOAD_DIR
+        value: /var/data/muscle-dynamics

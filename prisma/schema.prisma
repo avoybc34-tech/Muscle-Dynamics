@@ -1,0 +1,310 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  MEMBER
+  STAFF
+  OWNER
+}
+
+enum AccountStatus {
+  ACTIVE
+  SUSPENDED
+}
+
+enum PaymentStatus {
+  DRAFT
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum PaymentType {
+  BANK
+  EASYPAISA
+  JAZZCASH
+  CASH
+  OTHER
+}
+
+enum FileKind {
+  PROOF
+  PUBLIC
+}
+
+enum BookingStatus {
+  CONFIRMED
+  CANCELLED
+}
+
+enum TicketStatus {
+  OPEN
+  RESOLVED
+}
+
+model User {
+  id            String           @id @default(uuid()) @db.Char(36)
+  name          String
+  email         String           @unique @db.VarChar(254)
+  phone         String
+  passwordHash  String
+  role          Role             @default(MEMBER)
+  status        AccountStatus    @default(ACTIVE)
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @updatedAt
+  sessions      Session[]
+  payments      PaymentRequest[] @relation("Purchaser")
+  reviews       PaymentRequest[] @relation("Reviewer")
+  membership    Membership?
+  subscriptions Subscription[]
+  files         StoredFile[]
+  notifications Notification[]
+  attendance    Attendance[]     @relation("Attendee")
+  checkins      Attendance[]     @relation("Recorder")
+  progress      ProgressLog[]
+  bookings      Booking[]
+  tickets       SupportTicket[]
+  audits        AuditLog[]
+}
+
+model Session {
+  id        String   @id @default(uuid()) @db.Char(36)
+  tokenHash String   @unique @db.Char(64)
+  userId    String   @db.Char(36)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@index([expiresAt])
+}
+
+model Plan {
+  id            String           @id @default(uuid()) @db.Char(36)
+  slug          String           @unique
+  name          String
+  tagline       String           @default("")
+  pricePaise    Int
+  currency      String           @default("PKR")
+  durationDays  Int              @default(30)
+  features      Json
+  highlight     Boolean          @default(false)
+  active        Boolean          @default(false)
+  sortOrder     Int              @default(0)
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @updatedAt
+  payments      PaymentRequest[]
+  memberships   Membership[]
+  subscriptions Subscription[]
+}
+
+model PaymentAccount {
+  id            String           @id @default(uuid()) @db.Char(36)
+  label         String
+  type          PaymentType
+  bankName      String           @default("")
+  accountName   String           @default("")
+  accountNumber String           @default("")
+  iban          String           @default("")
+  note          String           @default("") @db.Text
+  active        Boolean          @default(false)
+  createdAt     DateTime         @default(now())
+  payments      PaymentRequest[]
+}
+
+model PaymentRequest {
+  id              String         @id @default(uuid()) @db.Char(36)
+  refNo           Int            @unique @default(autoincrement())
+  userId          String         @db.Char(36)
+  user            User           @relation("Purchaser", fields: [userId], references: [id])
+  planId          String         @db.Char(36)
+  plan            Plan           @relation(fields: [planId], references: [id])
+  accountId       String         @db.Char(36)
+  account         PaymentAccount @relation(fields: [accountId], references: [id])
+  planName        String
+  durationDays    Int
+  accountSnapshot Json
+  amountPaise     Int
+  currency        String         @default("PKR")
+  proofId         String?        @unique @db.Char(36)
+  proof           StoredFile?    @relation("PaymentProof", fields: [proofId], references: [id])
+  proofNote       String         @default("") @db.Text
+  status          PaymentStatus  @default(DRAFT)
+  adminNote       String         @default("") @db.Text
+  reviewedById    String?        @db.Char(36)
+  reviewer        User?          @relation("Reviewer", fields: [reviewedById], references: [id])
+  reviewedAt      DateTime?
+  submittedAt     DateTime?
+  createdAt       DateTime       @default(now())
+  subscription    Subscription?
+
+  @@index([status, submittedAt])
+  @@index([userId, createdAt])
+}
+
+model Membership {
+  id          String    @id @default(uuid()) @db.Char(36)
+  userId      String    @unique @db.Char(36)
+  user        User      @relation(fields: [userId], references: [id])
+  planId      String    @db.Char(36)
+  plan        Plan      @relation(fields: [planId], references: [id])
+  planName    String
+  startsAt    DateTime
+  endsAt      DateTime
+  cancelledAt DateTime?
+  updatedAt   DateTime  @updatedAt
+
+  @@index([endsAt])
+}
+
+model Subscription {
+  id        String         @id @default(uuid()) @db.Char(36)
+  userId    String         @db.Char(36)
+  user      User           @relation(fields: [userId], references: [id])
+  planId    String         @db.Char(36)
+  plan      Plan           @relation(fields: [planId], references: [id])
+  paymentId String         @unique @db.Char(36)
+  payment   PaymentRequest @relation(fields: [paymentId], references: [id])
+  startsAt  DateTime
+  endsAt    DateTime
+  createdAt DateTime       @default(now())
+}
+
+model StoredFile {
+  id         String          @id @default(uuid()) @db.Char(36)
+  userId     String          @db.Char(36)
+  user       User            @relation(fields: [userId], references: [id])
+  storageKey String          @unique
+  kind       FileKind
+  mime       String          @default("image/jpeg")
+  bytes      Int
+  createdAt  DateTime        @default(now())
+  payment    PaymentRequest? @relation("PaymentProof")
+}
+
+model Notification {
+  id        String    @id @default(uuid()) @db.Char(36)
+  userId    String    @db.Char(36)
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title     String
+  message   String    @db.Text
+  readAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([userId, createdAt])
+}
+
+model Attendance {
+  id           String   @id @default(uuid()) @db.Char(36)
+  userId       String   @db.Char(36)
+  user         User     @relation("Attendee", fields: [userId], references: [id])
+  recordedById String   @db.Char(36)
+  recorder     User     @relation("Recorder", fields: [recordedById], references: [id])
+  day          String   @db.Char(10)
+  createdAt    DateTime @default(now())
+
+  @@unique([userId, day])
+  @@index([day])
+}
+
+model ProgressLog {
+  id        String   @id @default(uuid()) @db.Char(36)
+  userId    String   @db.Char(36)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  weight    Float?
+  workouts  Int      @default(0)
+  calories  Int      @default(0)
+  waist     Float?
+  notes     String   @default("") @db.Text
+  createdAt DateTime @default(now())
+
+  @@index([userId, createdAt])
+}
+
+model Trainer {
+  id        String     @id @default(uuid()) @db.Char(36)
+  name      String
+  specialty String
+  bio       String     @default("") @db.Text
+  photoId   String?    @db.Char(36)
+  active    Boolean    @default(true)
+  classes   GymClass[]
+}
+
+model GymClass {
+  id        String    @id @default(uuid()) @db.Char(36)
+  title     String
+  trainerId String    @db.Char(36)
+  trainer   Trainer   @relation(fields: [trainerId], references: [id])
+  startsAt  DateTime
+  endsAt    DateTime
+  capacity  Int
+  active    Boolean   @default(true)
+  bookings  Booking[]
+
+  @@index([startsAt])
+}
+
+model Booking {
+  id        String        @id @default(uuid()) @db.Char(36)
+  userId    String        @db.Char(36)
+  user      User          @relation(fields: [userId], references: [id])
+  classId   String        @db.Char(36)
+  gymClass  GymClass      @relation(fields: [classId], references: [id])
+  status    BookingStatus @default(CONFIRMED)
+  createdAt DateTime      @default(now())
+
+  @@unique([userId, classId])
+}
+
+model Announcement {
+  id        String   @id @default(uuid()) @db.Char(36)
+  title     String
+  message   String   @db.Text
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+}
+
+model SupportTicket {
+  id        String       @id @default(uuid()) @db.Char(36)
+  userId    String       @db.Char(36)
+  user      User         @relation(fields: [userId], references: [id])
+  subject   String
+  message   String       @db.Text
+  reply     String       @default("") @db.Text
+  status    TicketStatus @default(OPEN)
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+}
+
+model Setting {
+  key       String   @id
+  value     Json
+  updatedAt DateTime @updatedAt
+}
+
+model AuditLog {
+  id        String   @id @default(uuid()) @db.Char(36)
+  actorId   String   @db.Char(36)
+  actor     User     @relation(fields: [actorId], references: [id])
+  action    String
+  entity    String
+  entityId  String
+  detail    Json
+  createdAt DateTime @default(now())
+
+  @@index([createdAt])
+}
+
+model RateLimit {
+  key       String   @id
+  count     Int      @default(1)
+  expiresAt DateTime
+
+  @@index([expiresAt])
+}
