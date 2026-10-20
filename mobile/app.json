@@ -5,12 +5,17 @@
     "version": "1.0.0",
     "orientation": "portrait",
     "userInterfaceStyle": "light",
-    "platforms": ["android", "ios"],
+    "platforms": [
+      "android",
+      "ios"
+    ],
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.yourgym.muscledynamics"
     },
-    "android": { "package": "com.yourgym.muscledynamics" },
+    "android": {
+      "package": "com.yourgym.muscledynamics"
+    },
     "plugins": [
       "expo-secure-store",
       [
@@ -20,8 +25,13 @@
           "cameraPermission": false,
           "microphonePermission": false
         }
-      ]
+      ],
+      "expo-font"
     ],
-    "extra": { "eas": { "projectId": "" } }
+    "extra": {
+      "eas": {
+        "projectId": ""
+      }
+    }
   }
 }
