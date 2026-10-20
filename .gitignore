@@ -1,0 +1,16 @@
+node_modules/
+.next/
+.env
+.env.*
+!.env.example
+.uploads/
+.test-artifacts/
+mobile/.expo/
+mobile/.export-check/
+mobile/dist/
+*.log
+*.zip
+.DS_Store
+.next-browser/
+.browser-fixture.mjs
+.playwright-cli/
