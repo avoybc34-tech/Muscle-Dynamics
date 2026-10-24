@@ -2,7 +2,9 @@
 
 ## Configure the real business
 
-Use **Profile → Owner tools**. Settings control gym contacts, address/hours, policies and receiving instructions. Plans accept PKR prices (stored as integer paise), duration in days and benefits, one per line. Accounts support BANK, EASYPAISA, JAZZCASH and CASH; use only accounts you control. Transfer options need a real account title/number. Do not use sample bank details.
+The owner landing screen groups Payment reviews, Member access, Membership plans, Receiving accounts, Training plans, Class schedule, Announcements, Support inbox, Gym settings and Audit history. Staff see only member lookup and support. Use Back to workspace to return. All live endpoints still enforce server roles.
+
+Use **Profile → Owner workspace**. Settings control gym contacts, address/hours, policies and receiving instructions. Plans accept PKR prices (stored as integer paise), duration in days and benefits, one per line. Accounts support BANK, EASYPAISA, JAZZCASH and CASH; use only accounts you control. Transfer options need a real account title/number. Do not use sample bank details.
 
 Existing plan/account/workout details can be edited, and published records can be deactivated without deleting past payment snapshots. Workouts use exercise fields with Add/Remove controls, sets, reps, rest seconds and technique instructions—not a raw JSON editor. Workout level must be Beginner, Intermediate or Advanced. Classes currently use explicit ISO-8601 timestamps; check the timezone before publishing. Announcements publish to members and create notification events.
 
@@ -10,7 +12,7 @@ Existing plan/account/workout details can be edited, and published records can b
 
 1. Member chooses a published plan and receiving option, creates a draft, follows actual transfer/cash instructions, attaches their private proof, enters a useful reference and submits.
 2. Status is **PENDING**. Uploading an image or ticking a member confirmation does **not** activate or renew membership.
-3. Owner opens **payments**, inspects private proof, and checks actual bank/Easypaisa/JazzCash records or physically received cash independently. Screenshots alone are not verification.
+3. Owner opens **Payment reviews**, inspects private proof, and checks actual bank/Easypaisa/JazzCash records or physically received cash independently. Screenshots alone are not verification.
 4. Approve only after actual funds are confirmed; enter the actual verified transaction/reference and review note. Duplicate references are rejected. Reject unsupported/unreceived requests with a clear note.
 5. The transaction writes the financial decision, history, membership and notification once. Concurrent duplicate approvals cannot double-extend a period.
 

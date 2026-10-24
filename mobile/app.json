@@ -2,7 +2,7 @@
   "expo": {
     "name": "Muscle Dynamics",
     "slug": "muscle-dynamics",
-    "version": "2.0.0",
+    "version": "2.1.0",
     "orientation": "portrait",
     "userInterfaceStyle": "dark",
     "platforms": [
@@ -30,14 +30,14 @@
         {
           "image": "./assets/icon.png",
           "imageWidth": 100,
-          "backgroundColor": "#080f1b"
+          "backgroundColor": "#101827"
         }
       ],
       [
         "expo-notifications",
         {
           "icon": "./assets/notification.png",
-          "color": "#69e3c0"
+          "color": "#1762e8"
         }
       ],
       [

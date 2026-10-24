@@ -1,10 +1,16 @@
 Starting Metro Bundler
 
-Android Bundled 7136ms node_modules/expo/AppEntry.js (1046 modules)
-iOS Bundled 12716ms node_modules/expo/AppEntry.js (1194 modules)
+Android Bundled 12586ms node_modules/expo/AppEntry.js (1201 modules)
+iOS Bundled 20342ms node_modules/expo/AppEntry.js (1203 modules)
 
-› Assets (44):
+› Assets (50):
+assets/fonts/Manrope-400.ttf (97KB)
+assets/fonts/Manrope-500.ttf (97KB)
+assets/fonts/Manrope-600.ttf (97KB)
+assets/fonts/Manrope-700.ttf (97KB)
+assets/fonts/Manrope-800.ttf (98KB)
 assets/sample-receipt.png (30KB)
+assets/training-floor.jpg (280KB)
 node_modules/@expo/vector-icons/build/vendor/react-native-vector-icons/Fonts/AntDesign.ttf (130KB)
 node_modules/@expo/vector-icons/build/vendor/react-native-vector-icons/Fonts/Entypo.ttf (66KB)
 node_modules/@expo/vector-icons/build/vendor/react-native-vector-icons/Fonts/EvilIcons.ttf (13KB)
@@ -31,12 +37,12 @@ node_modules/@react-navigation/elements/lib/module/assets/close-icon.png (4 vari
 node_modules/@react-navigation/elements/lib/module/assets/search-icon.png (7 variations | 592B)
 
 › android bundles (1):
-_expo/static/js/android/AppEntry-121811cfde708f5b4ae3ad002741f872.hbc (2.9MB)
+_expo/static/js/android/AppEntry-337563cfa323df4c50f1be888eaeb574.hbc (2.9MB)
 
 › ios bundles (1):
-_expo/static/js/ios/AppEntry-aebe71ae72a10e7bd4e126a3a396a7d0.hbc (2.9MB)
+_expo/static/js/ios/AppEntry-a3205acd2360cffb9f21ebd2cc68b6e8.hbc (2.9MB)
 
 › Files (1):
-metadata.json (4.8KB)
+metadata.json (5.6KB)
 
 Exported: .design-export

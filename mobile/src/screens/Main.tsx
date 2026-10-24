@@ -1,5 +1,6 @@
+import { Text } from "../components/Typography";
 import React, { useEffect, useState } from "react";
-import { View, Text, Pressable, Image } from "react-native";
+import { View, Pressable, Image } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import {
@@ -16,6 +17,7 @@ import {
   Skeleton,
   styles,
 } from "../components/UI";
+import { Brand, TrainingHero, Week } from "../components/Visuals";
 import { T, date, money } from "../theme";
 import { useSession } from "../Session";
 import type { Workout, Plan } from "../types";
@@ -42,7 +44,8 @@ export function useResource<T>(path: string) {
 }
 export function Home({ navigation: n }: any) {
   const s = useSession(),
-    d = s.data;
+    d = s.data,
+    r = useResource<Workout[]>("workouts");
   const [refresh, setRefresh] = useState(false);
   if (!d)
     return (
@@ -57,126 +60,100 @@ export function Home({ navigation: n }: any) {
         )}
       </Screen>
     );
-  const m = d.membership,
-    completed = d.activities.filter((a) => a.completedAt);
+  const featured = r.data?.[0],
+    m = d.membership;
   return (
     <Screen
+      refresh={refresh}
       onRefresh={async () => {
         setRefresh(true);
         try {
           await s.load();
+          await r.reload();
         } finally {
           setRefresh(false);
         }
       }}
-      refresh={refresh}
     >
-      <View
-        style={{
-          flexDirection: "row",
-          justifyContent: "space-between",
-          alignItems: "center",
-          paddingTop: 8,
-        }}
-      >
-        <View style={{ gap: 5, flex: 1 }}>
-          <Label>YOUR DAILY MOMENTUM</Label>
-          <Text numberOfLines={1} style={[styles.title, { fontSize: 28 }]}>
-            Let's go, {s.user?.name.split(" ")[0]}.
-          </Text>
-          <P muted>One session closer to your goals.</P>
-        </View>
-        <Pressable
-          accessibilityLabel="Open profile"
-          onPress={() => n.navigate("Profile")}
-          style={{
-            height: 48,
-            width: 48,
-            borderRadius: 17,
-            backgroundColor: T.raised,
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-        >
-          <Text style={{ color: T.accent, fontSize: 20, fontWeight: "800" }}>
-            {s.user?.name[0]}
-          </Text>
-        </Pressable>
-      </View>
+      <Brand
+        name={s.user?.name || "Member"}
+        avatar={
+          s.user?.avatarId && !s.demo
+            ? {
+                uri: s.origin + "/v1/files/" + s.user.avatarId,
+                headers: { Authorization: "Bearer " + s.token() },
+              }
+            : undefined
+        }
+        onPress={() => n.navigate("Profile")}
+      />
       {!!s.dataError && (
         <ErrorBox
           message={s.dataError}
           retry={() => s.load().catch(() => {})}
         />
       )}
-      <LinearGradient
-        colors={["#28483f", "#172f3a", "#152236"]}
-        style={{ padding: 24, borderRadius: 27, gap: 16 }}
+      {r.busy ? (
+        <Skeleton />
+      ) : r.error ? (
+        <ErrorBox message={r.error} retry={r.reload} />
+      ) : featured ? (
+        <TrainingHero
+          title={featured.title}
+          meta={`${featured.durationMinutes} min · ${featured.exercises.length} exercises`}
+          action="Start workout"
+          onPress={() => n.navigate("WorkoutDetail", { workout: featured })}
+        />
+      ) : (
+        <Empty
+          title="Your next session starts here"
+          text="Your gym has not published a training plan yet."
+        />
+      )}
+      <Week activities={d.activities} onPress={() => n.navigate("Activity")} />
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel="Manage membership"
+        onPress={() => n.navigate("Membership")}
       >
-        <View style={styles.row}>
-          <Ionicons name="fitness-outline" color={T.accent} size={24} />
-          <Label>SHOW UP FOR YOURSELF</Label>
-        </View>
-        <Text
-          style={{
-            color: T.text,
-            fontSize: 33,
-            lineHeight: 39,
-            fontWeight: "800",
-            letterSpacing: -1,
-          }}
+        <Card style={{ padding: 20 }}>
+          <View
+            style={{
+              flexDirection: "row",
+              justifyContent: "space-between",
+              alignItems: "center",
+              gap: 12,
+            }}
+          >
+            <View style={{ flex: 1, gap: 5 }}>
+              <H2>{m?.planName || "Your membership"}</H2>
+              <P muted>
+                {m
+                  ? `${m.status === "ACTIVE" ? "Valid until" : "Status: " + m.status + " ·"} ${date(m.endsAt)}`
+                  : "Explore gym-published plans"}
+              </P>
+            </View>
+            <Ionicons name="chevron-forward" size={22} color={T.text} />
+          </View>
+        </Card>
+      </Pressable>
+      {d.announcements.length > 0 ? (
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel="Read gym updates"
+          onPress={() => n.navigate("Updates")}
         >
-          Your next chapter{`\n`}starts with a rep.
-        </Text>
-        <P muted>
-          Explore your gym's training plans and make time for your next session.
-        </P>
-        <Button
-          title="Find your workout"
-          onPress={() => n.navigate("Workouts")}
-        />
-      </LinearGradient>
-      <View style={{ flexDirection: "row", gap: 12 }}>
-        <Card style={{ flex: 1, padding: 16 }}>
-          <Ionicons name="flash-outline" size={22} color={T.accent} />
-          <Text style={{ color: T.text, fontSize: 29, fontWeight: "800" }}>
-            {completed.length}
-          </Text>
-          <Text style={styles.tiny}>Completed sessions</Text>
-        </Card>
-        <Card style={{ flex: 1, padding: 16 }}>
-          <Ionicons name="trending-up-outline" size={22} color={T.blue} />
-          <Text style={{ color: T.text, fontSize: 29, fontWeight: "800" }}>
-            {d.progress[0]?.weight ?? "—"}
-            <Text style={styles.tiny}> kg</Text>
-          </Text>
-          <Text style={styles.tiny}>Latest logged weight</Text>
-        </Card>
-      </View>
-      <H2>Your membership</H2>
-      <Card>
-        <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
-          <Ionicons name="card-outline" size={25} color={T.accent} />
-          <Badge value={m?.status || "NOT ACTIVE"} />
-        </View>
-        <H2>{m?.planName || "Find your fit."}</H2>
-        <P muted>
-          {m
-            ? "Valid through " + date(m.endsAt)
-            : "Choose an owner-published plan. Membership begins only after actual payment verification."}
-        </P>
-        <Button
-          title={m ? "Manage membership" : "Explore plans"}
-          outline
-          onPress={() => n.navigate("Membership")}
-        />
-      </Card>
-      <H2>Make it part of your week</H2>
+          <Card style={{ padding: 16, backgroundColor: T.bg, gap: 4 }}>
+            <Text style={{ fontSize: 11, color: T.accent }}>Gym update</Text>
+            <P muted>{d.announcements[0].title}</P>
+          </Card>
+        </Pressable>
+      ) : null}
       <Card>
         <Row
           icon="calendar-outline"
-          title="Upcoming classes"
-          subtitle={`${d.bookings.length} booking${d.bookings.length === 1 ? "" : "s"}`}
+          title="Class schedule"
+          subtitle={`${d.bookings.length} upcoming booking${d.bookings.length === 1 ? "" : "s"}`}
           onPress={() => n.navigate("Classes")}
         />
         <Row
@@ -186,49 +163,45 @@ export function Home({ navigation: n }: any) {
           onPress={() => n.navigate("ProgressEntry")}
         />
       </Card>
-      {!!(d.announcements.length > 0) && (
-        <>
-          <H2>From your gym</H2>
-          {d.announcements.slice(0, 2).map((a) => (
-            <Card key={a.id}>
-              <Label>GYM UPDATE</Label>
-              <H2>{a.title}</H2>
-              <P muted>{a.message}</P>
-            </Card>
-          ))}
-        </>
-      )}
     </Screen>
   );
 }
 export function Workouts({ navigation: n }: any) {
   const r = useResource<Workout[]>("workouts"),
     [category, setCategory] = useState("All");
-  const categories = ["All", ...new Set(r.data?.map((x) => x.category))];
+  const categories = ["All", ...new Set(r.data?.map((x) => x.category))],
+    filtered = r.data?.filter(
+      (w) => category === "All" || w.category === category,
+    );
   return (
     <Screen
-      title="Train with purpose."
-      subtitle="Plans from your gym. Progress at your pace."
+      title="Find your focus."
+      subtitle="Trainer-published plans, built for your gym."
     >
       <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 8 }}>
         {categories.map((c) => (
           <Pressable
             key={c}
+            accessibilityRole="button"
+            accessibilityLabel={c + " workout category"}
             onPress={() => setCategory(c)}
             style={{
-              paddingHorizontal: 16,
-              paddingVertical: 11,
-              borderRadius: 30,
-              backgroundColor: c === category ? T.accent : T.raised,
+              paddingHorizontal: 15,
+              paddingVertical: 10,
+              borderRadius: 22,
+              borderWidth: 1,
+              borderColor: c === category ? T.primary : T.line,
+              backgroundColor: c === category ? T.primary : "transparent",
             }}
           >
             <Text
               style={{
-                fontWeight: "700",
-                color: c === category ? T.bg : T.muted,
+                color: c === category ? "white" : T.muted,
+                fontWeight: "600",
+                fontSize: 12,
               }}
             >
-              {c}
+              {c === "All" ? "All plans" : c}
             </Text>
           </Pressable>
         ))}
@@ -237,61 +210,33 @@ export function Workouts({ navigation: n }: any) {
         <Skeleton />
       ) : r.error ? (
         <ErrorBox message={r.error} retry={r.reload} />
-      ) : !r.data?.length ? (
+      ) : !filtered?.length ? (
         <Empty
           title="Your next routine is on its way"
-          text="Your gym has not published a workout plan yet."
+          text="Your gym has not published a workout in this category yet."
         />
       ) : (
-        r.data
-          .filter((w) => category === "All" || w.category === category)
-          .map((w, i) => (
-            <Pressable
+        filtered.map((w, i) =>
+          i === 0 ? (
+            <TrainingHero
               key={w.id}
+              eyebrow={w.category}
+              title={w.title}
+              meta={`${w.durationMinutes} min · ${w.level} · ${w.exercises.length} exercises`}
+              action="View workout"
               onPress={() => n.navigate("WorkoutDetail", { workout: w })}
-            >
-              <Card>
-                <LinearGradient
-                  colors={
-                    i % 2 ? ["#363b59", "#182436"] : ["#214a42", "#142b32"]
-                  }
-                  style={{
-                    borderRadius: 16,
-                    padding: 22,
-                    flexDirection: "row",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                  }}
-                >
-                  <Ionicons
-                    name={
-                      w.category === "Mobility"
-                        ? "body-outline"
-                        : "barbell-outline"
-                    }
-                    size={46}
-                    color={T.accent}
-                  />
-                  <Text
-                    style={{
-                      color: T.text,
-                      fontSize: 36,
-                      fontWeight: "900",
-                      opacity: 0.35,
-                    }}
-                  >
-                    {String(i + 1).padStart(2, "0")}
-                  </Text>
-                </LinearGradient>
-                <Label>{w.category.toUpperCase()}</Label>
-                <H2>{w.title}</H2>
-                <P muted>
-                  {w.durationMinutes} min · {w.level} · {w.exercises.length}{" "}
-                  exercises
-                </P>
-              </Card>
-            </Pressable>
-          ))
+            />
+          ) : (
+            <Card key={w.id}>
+              <Row
+                icon="barbell-outline"
+                title={w.title}
+                subtitle={`${w.durationMinutes} min · ${w.level} · ${w.exercises.length} exercises`}
+                onPress={() => n.navigate("WorkoutDetail", { workout: w })}
+              />
+            </Card>
+          ),
+        )
       )}
       <Card>
         <Row
@@ -309,8 +254,8 @@ export function Membership({ navigation: n }: any) {
     m = data?.membership;
   return (
     <Screen
-      title="Your membership."
-      subtitle="A clear plan. A stronger routine."
+      title="Keep moving."
+      subtitle="Your plan, paid-through date and payment records."
     >
       <LinearGradient
         colors={["#263c55", "#16263a"]}
@@ -368,9 +313,10 @@ export function Activity({ navigation: n }: any) {
     d = s.data;
   return (
     <Screen
-      title="Every session counts."
+      title="Progress, over time."
       subtitle="Your training history and personal progress."
     >
+      <Week activities={d?.activities || []} />
       <View style={{ flexDirection: "row", gap: 12 }}>
         <Card style={{ flex: 1 }}>
           <Label>WORKOUTS</Label>
@@ -441,7 +387,7 @@ export function Profile({ navigation: n }: any) {
     u = s.user;
   return (
     <Screen
-      title="Your space."
+      title="Your profile."
       subtitle="Personal details, membership and preferences."
     >
       <Card style={{ alignItems: "center", paddingVertical: 28 }}>
@@ -458,7 +404,7 @@ export function Profile({ navigation: n }: any) {
             style={{
               height: 88,
               width: 88,
-              borderRadius: 30,
+              borderRadius: 44,
               backgroundColor: T.raised,
               justifyContent: "center",
               alignItems: "center",
@@ -499,16 +445,16 @@ export function Profile({ navigation: n }: any) {
           onPress={() => n.navigate("Security")}
         />
       </Card>
-      {!!(u?.role === "OWNER") && (
+      {u?.role !== "MEMBER" ? (
         <Card>
           <Row
             icon="business-outline"
-            title={s.user?.role === "STAFF" ? "Staff tools" : "Owner tools"}
-            subtitle="Manage live gym data and payment reviews"
+            title={u?.role === "STAFF" ? "Staff workspace" : "Owner workspace"}
+            subtitle="Gym management and restricted administrative tools"
             onPress={() => n.navigate("Owner")}
           />
         </Card>
-      )}
+      ) : null}
       <Button
         title={s.demo ? "Exit sample design" : "Log out"}
         outline

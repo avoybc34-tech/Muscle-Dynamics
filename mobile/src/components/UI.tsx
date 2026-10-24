@@ -1,7 +1,7 @@
+import { Text } from "./Typography";
 import React, { useEffect, useRef, useState } from "react";
 import {
   View,
-  Text,
   ScrollView,
   Pressable,
   TextInput,
@@ -18,7 +18,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { T } from "../theme";
 import { useSession } from "../Session";
 export const styles = StyleSheet.create({
-  title: { fontSize: 30, fontWeight: "800", letterSpacing: -1, color: T.text },
+  title: { fontSize: 27, fontWeight: "800", letterSpacing: -1, color: T.text },
   subtitle: { fontSize: 14, lineHeight: 22, color: T.muted },
   h2: { fontSize: 20, fontWeight: "700", color: T.text, letterSpacing: -0.4 },
   text: { fontSize: 15, color: T.text, lineHeight: 23 },
@@ -26,8 +26,8 @@ export const styles = StyleSheet.create({
   row: { flexDirection: "row", alignItems: "center", gap: 12 },
   card: {
     backgroundColor: T.card,
-    borderRadius: 22,
-    padding: 20,
+    borderRadius: 25,
+    padding: 19,
     borderWidth: 1,
     borderColor: T.line,
     gap: 12,
@@ -40,8 +40,8 @@ export const styles = StyleSheet.create({
   },
   button: {
     minHeight: 52,
-    backgroundColor: T.accent,
-    borderRadius: 16,
+    backgroundColor: T.primary,
+    borderRadius: 27,
     alignItems: "center",
     justifyContent: "center",
     paddingHorizontal: 20,
@@ -52,11 +52,12 @@ export const styles = StyleSheet.create({
     backgroundColor: T.card,
     borderColor: T.line,
     borderWidth: 1,
-    borderRadius: 14,
+    borderRadius: 15,
     color: T.text,
     padding: 15,
     minHeight: 52,
     fontSize: 16,
+    fontFamily: "Manrope400",
   },
   link: { color: T.blue, fontSize: 14, fontWeight: "700" },
 });
@@ -87,14 +88,20 @@ export function Screen({
     );
   }, []);
   return (
-    <Animated.View style={{ flex: 1, opacity, backgroundColor: T.bg }}>
+    <Animated.View
+      testID="app-screen"
+      style={{ flex: 1, opacity, backgroundColor: T.bg }}
+    >
       <ScrollView
         keyboardShouldPersistTaps="handled"
         contentContainerStyle={{
-          padding: 22,
+          padding: 19,
+          width: "100%",
+          maxWidth: 580,
+          alignSelf: "center",
           paddingTop: headerHeight > 0 ? 18 : Math.max(insets.top + 12, 24),
-          paddingBottom: 32,
-          gap: 20,
+          paddingBottom: headerHeight > 0 ? 32 : 120,
+          gap: 16,
         }}
         refreshControl={
           onRefresh ? (
@@ -107,7 +114,7 @@ export function Screen({
         }
       >
         {!!demo && (
-          <Text style={{ fontSize: 10, color: T.amber, letterSpacing: 1 }}>
+          <Text style={{ fontSize: 9, color: T.muted, letterSpacing: 1 }}>
             DEMO · SAMPLE DATA · NO REAL PAYMENTS
           </Text>
         )}
@@ -182,13 +189,13 @@ export function Button({
       ]}
     >
       {busy ? (
-        <ActivityIndicator color={T.bg} />
+        <ActivityIndicator color={T.text} />
       ) : (
         <Text
           style={{
             fontSize: 15,
             fontWeight: "800",
-            color: destructive ? T.danger : outline ? T.text : T.bg,
+            color: destructive ? T.danger : T.text,
           }}
         >
           {title}
@@ -279,11 +286,11 @@ export function Row({
   onPress?: () => void;
   right?: React.ReactNode;
 }) {
+  const Container = onPress ? Pressable : View;
   return (
-    <Pressable
+    <Container
       accessibilityRole={onPress ? "button" : undefined}
       onPress={onPress}
-      disabled={!onPress}
       style={{
         flexDirection: "row",
         alignItems: "center",
@@ -294,10 +301,10 @@ export function Row({
     >
       <View
         style={{
-          height: 42,
-          width: 42,
-          borderRadius: 14,
-          backgroundColor: T.raised,
+          height: 30,
+          width: 28,
+          borderRadius: 0,
+          backgroundColor: "transparent",
           alignItems: "center",
           justifyContent: "center",
         }}
@@ -305,7 +312,7 @@ export function Row({
         <Ionicons name={icon} size={21} color={T.accent} />
       </View>
       <View style={{ flex: 1, gap: 4 }}>
-        <Text style={{ color: T.text, fontSize: 15, fontWeight: "700" }}>
+        <Text style={{ color: T.text, fontSize: 13, fontWeight: "700" }}>
           {title}
         </Text>
         {!!subtitle && <Text style={styles.tiny}>{subtitle}</Text>}
@@ -314,7 +321,7 @@ export function Row({
         (onPress && (
           <Ionicons name="chevron-forward" size={18} color={T.muted} />
         ))}
-    </Pressable>
+    </Container>
   );
 }
 export function Badge({ value }: { value: string }) {
@@ -393,7 +400,7 @@ export function Skeleton() {
       {[100, 160, 110].map((h, i) => (
         <View
           key={i}
-          style={{ height: h, borderRadius: 22, backgroundColor: T.raised }}
+          style={{ height: h, borderRadius: 25, backgroundColor: T.raised }}
         />
       ))}
     </Animated.View>
@@ -420,7 +427,7 @@ export function Toggle({
           accessibilityLabel={title}
           value={value}
           onValueChange={onChange}
-          trackColor={{ false: T.line, true: "#33775f" }}
+          trackColor={{ false: T.line, true: "#315b96" }}
           thumbColor={value ? T.accent : T.muted}
         />
       }

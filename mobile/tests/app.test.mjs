@@ -141,3 +141,111 @@ test("React Native child guards never leak empty strings or zero into View", () 
     visit(ast);
   }
 });
+
+test("navy/blue branding stays consistent without teal theme accents", () => {
+  const theme = fs.readFileSync("src/theme.ts", "utf8");
+  assert(theme.includes('primary: "#1762e8"'));
+  assert(theme.includes('accent: "#719cff"'));
+  for (const file of [
+    "src/theme.ts",
+    "src/components/UI.tsx",
+    "src/screens/Main.tsx",
+    "src/screens/Payments.tsx",
+    "app.json",
+  ])
+    assert(
+      !/#69e3c0|#33775f|#427668|#214a42|#28483f/i.test(
+        fs.readFileSync(file, "utf8"),
+      ),
+      file,
+    );
+});
+test("admin is role restricted and includes owner bootstrap, finance and staff support", () => {
+  const app = fs.readFileSync("App.tsx", "utf8"),
+    owner = fs.readFileSync("src/screens/Owner.tsx", "utf8"),
+    auth = fs.readFileSync("src/screens/Auth.tsx", "utf8");
+  assert(
+    app.includes('s.user.role!=="MEMBER"') ||
+      app.includes('s.user.role !== "MEMBER"'),
+  );
+  assert(app.includes("component={Owner}"));
+  assert(auth.includes("Confirm owner password"));
+  assert(owner.includes("actualFundsConfirmed"));
+  assert(owner.includes("STAFF"));
+  assert(owner.includes("admin/members/"));
+  assert(owner.includes("ExerciseEditor"));
+});
+test("weekly activity reflects actual completed sessions without sample goals", async () => {
+  const { weeklyActivity } = await compile("src/services/activity.ts");
+  const now = new Date(2026, 9, 24, 12),
+    monday = new Date(2026, 9, 19, 12);
+  const actual = weeklyActivity(
+    [
+      { completedAt: monday.toISOString() },
+      { completedAt: null },
+      { completedAt: new Date(2026, 9, 18, 12).toISOString() },
+      { completedAt: new Date(2026, 9, 25, 12).toISOString() },
+    ],
+    now,
+  );
+  assert.equal(actual.days.length, 7);
+  assert.equal(actual.days[0].getDay(), 1);
+  assert.equal(actual.completed.length, 1);
+  assert.equal(weeklyActivity([], now).completed.length, 0);
+});
+test("isolated owner demo reviews samples only and cannot bypass confirmation", async () => {
+  const owner = createDemo("OWNER"),
+    member = createDemo(),
+    staff = createDemo("STAFF");
+  await assert.rejects(() => member.request("admin/payments"));
+  await assert.rejects(() => staff.request("admin/payments"));
+  await assert.rejects(() =>
+    staff.request("admin/members/demo-other", "PATCH", { role: "OWNER" }),
+  );
+  const payments = await owner.request("admin/payments"),
+    p = payments.find((x) => x.status === "PENDING");
+  assert(p);
+  await assert.rejects(() =>
+    owner.request("admin/payments/" + p.id + "/review", "POST", {
+      decision: "APPROVED",
+      note: "Sample only",
+      verifiedReference: "SAMPLE-REF",
+    }),
+  );
+  await owner.request("admin/payments/" + p.id + "/review", "POST", {
+    decision: "APPROVED",
+    note: "Sample only",
+    verifiedReference: "SAMPLE-REF",
+    actualFundsConfirmed: true,
+  });
+  assert.equal(
+    (await owner.request("admin/payments")).find((x) => x.id === p.id).status,
+    "APPROVED",
+  );
+  assert.equal((await member.request("dashboard")).payments.length, 1);
+  const plans = await owner.request("admin/plans");
+  await owner.request("admin/plans", "POST", {
+    ...plans[0],
+    id: undefined,
+    name: "Sample new plan",
+  });
+  assert(
+    (await owner.request("plans")).some((x) => x.name === "Sample new plan"),
+  );
+  await owner.request("admin/settings", "PUT", { gymName: "SAMPLE gym" });
+  assert.equal((await owner.request("config")).gymName, "SAMPLE gym");
+  assert.notEqual((await member.request("config")).gymName, "SAMPLE gym");
+});
+test("switch controls are not wrapped in a disabled row and finance UI gates approval", () => {
+  const ui = fs.readFileSync("src/components/UI.tsx", "utf8"),
+    owner = fs.readFileSync("src/screens/Owner.tsx", "utf8");
+  const row = ui.slice(
+    ui.indexOf("export function Row"),
+    ui.indexOf("export function Badge"),
+  );
+  assert(row.includes("onPress ? Pressable : View"));
+  assert(!row.includes("disabled={!onPress}"));
+  assert(
+    owner.includes("!funds || ref.trim().length < 3 || note.trim().length < 3"),
+  );
+});

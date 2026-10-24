@@ -1,20 +1,12 @@
-# Connected upgrade changes
+# Version 2.1 — approved full-app design
 
-## Initial inspection → version 2.0
+- Implemented the selected navy/blue design direction, photography-led training, bundled Manrope typography, rounded panels and floating native tabs across real member screens.
+- Kept live authentication/session behavior, data isolation, financial review rules, workout logging, progress, classes, private images, support, preferences and notification integration.
+- Included owner/staff tools and first-owner setup, as the latest instruction explicitly requested admin and everything shown in the designs. The temporary member-only scope is superseded.
+- Restructured owner navigation into a purposeful workspace, with actual settings, plans/accounts, members/roles, payments, workout exercise forms, classes, announcements, support and audit.
+- Added a clearly labelled, isolated owner demo; it changes sample data only and cannot contact the live API or verify real funds.
+- Corrected static-row wrappers so switches remain interactive; approval is disabled until independent funds confirmation, a reference and a reason are provided. Live server verification remains authoritative.
+- Weekly UI counts actual completed activities and does not invent a workout goal.
+- Captured actual browser demo screens after transitions completed, rather than presenting generated designs as implemented screenshots.
 
-The historical `INITIAL-DESIGN-AUDIT.md` describes the **pre-upgrade** offline source only. Its “no source modified/no native tests” wording is limited to that inspection, not this completed implementation phase.
-
-- Replaced the in-memory-only app core with a real MariaDB/Prisma/Fastify API, migrations, auth, personal records and role authorization.
-- Split the monolithic preview into native stack/tab navigation, session model, reusable UI and purpose-specific screens. Added native branded splash, actual session-aware launch and isolated auth screens.
-- Built connected signup/login, matching-password checks/visibility, private persistence, rotation/revocation/logout, one-time email reset integration and account security/session controls.
-- Reworked navy/blue dashboard, workout library/detail/set tracking, classes/bookings, activity/progress, membership/plans/payment history, profile/avatar and settings/help/policy screens.
-- Added private payment proof and owner-only actual-funds review, immutable financial snapshots/history, correct paid-through renewal rules, duplicate/conflict handling and audit trail. Paginated payment history and owner/staff record lists avoid a fixed first-page ceiling.
-- Added owner plan/account editing, exercise-field forms, class/announcement creation, support replies and restricted staff/member management.
-- Added notification preferences/history, permission/token registration, deduplicated backend events, paged renewal reminders, worker leases/retries/receipts, session-validity checks and consumed-response tap routing.
-- Fixed actual MariaDB changed-record concurrency failures, stale expiry/renewal race protection, native empty-string child guards and browser sample-proof loading; added regression checks.
-- Retained the manual GitHub test APK + unsigned IPA path, optional API/project/FCM settings and honest signing/service/advisory notices. No BAT/CMD launcher or pretend live paid state.
-- Preserved the useful earlier demo interactions as clearly labelled samples, separate from live mode. Old offline-only README/security instructions are replaced, not left as current setup advice.
-
-## Remaining release work is configuration/verification, not pretend completion
-
-Hosting, actual business information, mail/push credentials, lawful signing, native builds, physical-device testing, security/advisory mitigation and operational readiness must be completed as documented. This package does not claim production approval.
+20 mobile tests and 20/20 Expo Doctor checks passed. Android/iOS exports and native prebuilds passed. Backend source/migrations/dependencies remain byte-identical to the previously database-verified 23-test version. See VERIFICATION.md for the distinction between source/export checks and external native/device/service gates.

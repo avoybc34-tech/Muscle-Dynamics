@@ -161,7 +161,11 @@ function useModel() {
     return c;
   }
   async function fetchConfig() {
-    if (demoStore.current) return demoConfig;
+    if (demoStore.current) {
+      const c = await demoStore.current.request<Config>("config");
+      setConfig(c);
+      return c;
+    }
     const c = await send<Config>(originRef.current, "config");
     setConfig(c);
     return c;
@@ -170,15 +174,18 @@ function useModel() {
     const s = await send<Session>(
       originRef.current,
       path === "setup" ? "setup" : "auth/" + path,
-      { method: "POST", body },
+      {
+        method: "POST",
+        body,
+      },
     );
     setDemo(false);
     demoStore.current = null;
     await store(s);
     await load();
   }
-  async function enterDemo() {
-    demoStore.current = createDemo();
+  async function enterDemo(role: "MEMBER" | "OWNER" | "STAFF" = "MEMBER") {
+    demoStore.current = createDemo(role);
     setDemo(true);
     setConfig(demoConfig);
     const d = await demoStore.current.request<Dashboard>("dashboard");

@@ -1,117 +1,147 @@
 
-> muscle-dynamics-mobile@2.0.0 check
+> muscle-dynamics-mobile@2.1.0 check
 > npm run typecheck && npm test && npx expo install --check
 
 
-> muscle-dynamics-mobile@2.0.0 typecheck
+> muscle-dynamics-mobile@2.1.0 typecheck
 > tsc --noEmit
 
 
-> muscle-dynamics-mobile@2.0.0 test
+> muscle-dynamics-mobile@2.1.0 test
 > node --experimental-strip-types --test tests/*.test.mjs
 
 TAP version 13
-# (node:9299) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///home/user/muscle-dynamics-pro/mobile/src/demo.ts is not specified and it doesn't parse as CommonJS.
+# (node:5743) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///home/user/muscle-dynamics-pro/mobile/src/demo.ts is not specified and it doesn't parse as CommonJS.
 # Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
 # To eliminate this warning, add "type": "module" to /home/user/muscle-dynamics-pro/mobile/package.json.
 # (Use `node --trace-warnings ...` to show where the warning was created)
 # Subtest: explicit demo has isolated sample records and resets
 ok 1 - explicit demo has isolated sample records and resets
   ---
-  duration_ms: 1.788766
+  duration_ms: 2.394975
   type: 'test'
   ...
 # Subtest: demo workout tracking never calls a live backend
 ok 2 - demo workout tracking never calls a live backend
   ---
-  duration_ms: 0.373184
+  duration_ms: 0.40876
   type: 'test'
   ...
 # Subtest: demo checkout only creates sample pending data and never activates membership
 ok 3 - demo checkout only creates sample pending data and never activates membership
   ---
-  duration_ms: 1.213078
+  duration_ms: 1.260448
   type: 'test'
   ...
 # Subtest: client validates production origins and never allows embedded credentials
 ok 4 - client validates production origins and never allows embedded credentials
   ---
-  duration_ms: 62.017013
+  duration_ms: 70.664296
   type: 'test'
   ...
 # Subtest: client uses bearer headers and returns explicit server failures
 ok 5 - client uses bearer headers and returns explicit server failures
   ---
-  duration_ms: 27.997659
+  duration_ms: 31.369644
   type: 'test'
   ...
 # Subtest: secure sessions, real navigation, separate demo, notification routing and splash exist
 ok 6 - secure sessions, real navigation, separate demo, notification routing and splash exist
   ---
-  duration_ms: 0.266857
+  duration_ms: 0.30923
   type: 'test'
   ...
 # Subtest: React Native child guards never leak empty strings or zero into View
 ok 7 - React Native child guards never leak empty strings or zero into View
   ---
-  duration_ms: 136.498048
+  duration_ms: 126.989717
+  type: 'test'
+  ...
+# Subtest: navy/blue branding stays consistent without teal theme accents
+ok 8 - navy/blue branding stays consistent without teal theme accents
+  ---
+  duration_ms: 1.245598
+  type: 'test'
+  ...
+# Subtest: admin is role restricted and includes owner bootstrap, finance and staff support
+ok 9 - admin is role restricted and includes owner bootstrap, finance and staff support
+  ---
+  duration_ms: 0.810633
+  type: 'test'
+  ...
+# Subtest: weekly activity reflects actual completed sessions without sample goals
+ok 10 - weekly activity reflects actual completed sessions without sample goals
+  ---
+  duration_ms: 9.614034
+  type: 'test'
+  ...
+# Subtest: isolated owner demo reviews samples only and cannot bypass confirmation
+ok 11 - isolated owner demo reviews samples only and cannot bypass confirmation
+  ---
+  duration_ms: 1.838489
+  type: 'test'
+  ...
+# Subtest: switch controls are not wrapped in a disabled row and finance UI gates approval
+ok 12 - switch controls are not wrapped in a disabled row and finance UI gates approval
+  ---
+  duration_ms: 0.462337
   type: 'test'
   ...
 # Subtest: test acknowledgement cannot be omitted or treated as truthy text
-ok 8 - test acknowledgement cannot be omitted or treated as truthy text
+ok 13 - test acknowledgement cannot be omitted or treated as truthy text
   ---
-  duration_ms: 1.063617
+  duration_ms: 1.879388
   type: 'test'
   ...
 # Subtest: Android release signing must explicitly use test key
-ok 9 - Android release signing must explicitly use test key
+ok 14 - Android release signing must explicitly use test key
   ---
-  duration_ms: 0.285159
+  duration_ms: 0.490547
   type: 'test'
   ...
 # Subtest: application contains no EAS project identity and has matching native IDs
-ok 10 - application contains no EAS project identity and has matching native IDs
+ok 15 - application contains no EAS project identity and has matching native IDs
   ---
-  duration_ms: 8.282919
+  duration_ms: 9.115271
   type: 'test'
   ...
 # Subtest: frameworks remain aligned; no audit-force or legacy-peer workaround
-ok 11 - frameworks remain aligned; no audit-force or legacy-peer workaround
+ok 16 - frameworks remain aligned; no audit-force or legacy-peer workaround
   ---
-  duration_ms: 2.136389
+  duration_ms: 3.990015
   type: 'test'
   ...
 # Subtest: workflow is manual, read-only, and has distinct test/unsigned artifacts
-ok 12 - workflow is manual, read-only, and has distinct test/unsigned artifacts
+ok 17 - workflow is manual, read-only, and has distinct test/unsigned artifacts
   ---
-  duration_ms: 0.900296
+  duration_ms: 2.273547
   type: 'test'
   ...
 # Subtest: iOS build targets a device archive, disables signing, and checks embedded JS
-ok 13 - iOS build targets a device archive, disables signing, and checks embedded JS
+ok 18 - iOS build targets a device archive, disables signing, and checks embedded JS
   ---
-  duration_ms: 0.649157
+  duration_ms: 2.086081
   type: 'test'
   ...
 # Subtest: generated native projects, local environments and signing files are ignored
-ok 14 - generated native projects, local environments and signing files are ignored
+ok 19 - generated native projects, local environments and signing files are ignored
   ---
-  duration_ms: 0.801397
+  duration_ms: 1.744423
   type: 'test'
   ...
 # Subtest: monorepo workflow uses mobile working directory, lockfile and artifact paths
-ok 15 - monorepo workflow uses mobile working directory, lockfile and artifact paths
+ok 20 - monorepo workflow uses mobile working directory, lockfile and artifact paths
   ---
-  duration_ms: 1.113639
+  duration_ms: 2.993241
   type: 'test'
   ...
-1..15
-# tests 15
+1..20
+# tests 20
 # suites 0
-# pass 15
+# pass 20
 # fail 0
 # cancelled 0
 # skipped 0
 # todo 0
-# duration_ms 814.207473
+# duration_ms 916.083389
 Dependencies are up to date

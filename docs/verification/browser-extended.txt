@@ -1,0 +1,9 @@
+Class booking and cancellation in isolated demo: PASS
+Measurement form and sample save: PASS
+Profile edit sample save: PASS
+Password change matching validation: PASS
+Notification preferences sample save: PASS
+Support form and sample history: PASS
+Notification read state: PASS
+Auth screens and no member-only access to management controls: PASS
+Page/console errors: []

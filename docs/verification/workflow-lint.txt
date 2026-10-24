@@ -1,3 +1,3 @@
-actionlint 1.7.12, official archive checksum verified
+actionlint 1.7.12; official checksum verified.
 Command: actionlint -shellcheck= .github/workflows/build.yml
-Exit: 0; no diagnostics. Structural workflow validation only; shellcheck and actual GitHub jobs not executed.
+Exit 0, no diagnostics. Structural workflow lint, not an actual GitHub run.

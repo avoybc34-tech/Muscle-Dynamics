@@ -1,5 +1,6 @@
+import { Text } from "../components/Typography";
 import React, { useEffect, useState } from "react";
-import { Text, View, Alert } from "react-native";
+import { View, Alert } from "react-native";
 import {
   Screen,
   Card,
@@ -16,6 +17,8 @@ import {
 } from "../components/UI";
 import { useSession } from "../Session";
 import { useResource } from "./Main";
+import { Image } from "react-native";
+import { trainingImage } from "../components/Visuals";
 import { T, date } from "../theme";
 import type { Activity, Workout, SetRecord, GymClass } from "../types";
 export function WorkoutDetail({ route, navigation: n }: any) {
@@ -28,7 +31,32 @@ export function WorkoutDetail({ route, navigation: n }: any) {
       title={w.title}
       subtitle={`${w.level} · ${w.durationMinutes} min · ${w.category}`}
     >
+      <Image
+        source={trainingImage}
+        accessibilityLabel="Decorative training floor"
+        style={{ width: "100%", height: 145, borderRadius: 25 }}
+      />
       <P muted>{w.description}</P>
+      <View
+        style={{
+          flexDirection: "row",
+          justifyContent: "space-around",
+          paddingVertical: 8,
+        }}
+      >
+        {[
+          [String(w.durationMinutes), "minutes"],
+          [String(w.exercises.length), "exercises"],
+          [String(w.exercises.reduce((n, x) => n + x.sets, 0)), "working sets"],
+        ].map(([value, label]) => (
+          <View key={label} style={{ alignItems: "center", gap: 4 }}>
+            <Text style={{ fontSize: 26, fontWeight: "800", color: T.text }}>
+              {value}
+            </Text>
+            <Text style={{ fontSize: 10, color: T.muted }}>{label}</Text>
+          </View>
+        ))}
+      </View>
       {w.exercises.map((x, i) => (
         <Card key={i}>
           <Label>EXERCISE {String(i + 1).padStart(2, "0")}</Label>

@@ -112,7 +112,7 @@ const account: Account = {
     instructions: "No real payment. Demonstration only.",
   },
 };
-export function createDemo() {
+export function createDemo(role: "MEMBER" | "OWNER" | "STAFF" = "MEMBER") {
   const state: Dashboard = {
     user: {
       id: "demo-user",
@@ -184,6 +184,43 @@ export function createDemo() {
       },
     ],
   };
+  state.user.role = role;
+  const mockMember = {
+    ...state.user,
+    id: "demo-other",
+    name: "Sample Member",
+    role: "MEMBER",
+    active: true,
+  };
+  if (role !== "MEMBER") {
+    state.payments.unshift({
+      ...state.payments[0],
+      id: "demo-pending-review",
+      status: "PENDING",
+      reference: "SAMPLE-PENDING-NO-TRANSFER",
+      proofNote: "Sample only. No actual money was transferred.",
+    });
+    state.tickets.push({
+      id: "demo-support",
+      subject: "Sample renewal question",
+      message: "Where can I see my renewal decision?",
+      reply: "",
+      status: "OPEN",
+      createdAt: date(0),
+    });
+  }
+  const management: any = {
+    settings: { ...demoConfig },
+    plans: JSON.parse(JSON.stringify(demoPlans)),
+    accounts: [JSON.parse(JSON.stringify(account))],
+    workouts: JSON.parse(JSON.stringify(demoWorkouts)),
+    classes: [],
+    members: [{ ...state.user, active: true }, mockMember],
+    payments: state.payments,
+    support: state.tickets,
+    announcements: state.announcements,
+    audit: [],
+  };
   let serial = 0;
   const clone = <T>(x: T): T => JSON.parse(JSON.stringify(x));
   async function request<T>(
@@ -192,19 +229,77 @@ export function createDemo() {
     body?: object | FormData,
   ): Promise<T> {
     const b = (body || {}) as any;
+    if (path.startsWith("admin/")) {
+      const [_, area, id, operation] = path.split("?")[0].split("/");
+      if (
+        role === "MEMBER" ||
+        (role === "STAFF" && !["support", "members"].includes(area)) ||
+        (role === "STAFF" && area === "members" && method !== "GET")
+      )
+        throw Error("Not allowed in this sample role.");
+      const data = management[area];
+      if (!data) throw Error("Unknown sample management area");
+      if (method === "GET")
+        return clone(
+          area === "payments"
+            ? data.map((x: any) => ({ ...x, user: mockMember }))
+            : data,
+        ) as T;
+      if (area === "payments" && operation === "review") {
+        const payment = data.find((x: any) => x.id === id);
+        if (!payment || payment.status !== "PENDING")
+          throw Error("Sample request already reviewed.");
+        if (
+          b.decision === "APPROVED" &&
+          (!b.actualFundsConfirmed ||
+            String(b.verifiedReference || "").trim().length < 3)
+        )
+          throw Error("Simulate funds confirmation and a reference first.");
+        if (String(b.note || "").trim().length < 3)
+          throw Error("Add a review reason.");
+        payment.status = b.decision;
+        payment.reviewNote = "SAMPLE ONLY: " + b.note;
+        management.audit.unshift({
+          id: "demo-audit-" + ++serial,
+          action: "SAMPLE_PAYMENT_" + b.decision,
+          targetId: id,
+        });
+        return clone(payment) as T;
+      }
+      if (area === "support" && operation === "reply") {
+        const item = data.find((x: any) => x.id === id);
+        Object.assign(item, b);
+        return clone(item) as T;
+      }
+      if (area === "settings") {
+        Object.assign(data, b);
+        return clone(data) as T;
+      }
+      if (id) {
+        const item = data.find((x: any) => x.id === id);
+        if (!item) throw Error("Sample record not found");
+        Object.assign(item, b);
+        return clone(item) as T;
+      }
+      const item = { ...b, id: "demo-created-" + ++serial, createdAt: date(0) };
+      data.unshift(item);
+      return clone(item) as T;
+    }
     let out: unknown;
     if (path === "dashboard") out = state;
-    else if (path === "config") out = demoConfig;
-    else if (path === "workouts") out = demoWorkouts;
-    else if (path === "plans") out = demoPlans;
+    else if (path === "config") out = management.settings;
+    else if (path === "workouts") out = management.workouts;
+    else if (path === "plans") out = management.plans;
     else if (path === "payment-options")
       out = {
-        accounts: [account],
-        instructions: demoConfig.paymentInstructions,
+        accounts: management.accounts,
+        instructions: management.settings.paymentInstructions,
         ready: true,
       };
     else if (/^workouts\/.*\/start$/.test(path)) {
-      const w = demoWorkouts.find((x) => x.id === path.split("/")[1])!;
+      const w = management.workouts.find(
+        (x: Workout) => x.id === path.split("/")[1],
+      )!;
       const a: Activity = {
         id: "demo-activity-" + ++serial,
         workoutId: w.id,
@@ -279,7 +374,7 @@ export function createDemo() {
       out = { ok: true };
     } else if (path === "sessions") out = [];
     else if (path === "payments" && method === "POST") {
-      const plan = demoPlans.find((x) => x.id === b.planId)!;
+      const plan = management.plans.find((x: Plan) => x.id === b.planId)!;
       const p: Payment = {
         id: "demo-draft-" + ++serial,
         reference: "SAMPLE-DRAFT-" + serial,

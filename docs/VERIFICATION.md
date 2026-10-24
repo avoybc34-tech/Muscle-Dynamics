@@ -1,13 +1,15 @@
 # Verification report
 
-**Source version 2.0 · 24 October 2026 · local workspace execution.** No hosted/live gym system or native binary is certified by this report.
+**Source version 2.1 · 24 October 2026 · local workspace execution.** No hosted/live gym system or native binary is certified by this report.
 
-## Executed after final application changes
+## Verification evidence
+
+Approved full-app implementation: mobile checks, exports, native prebuilds and member/admin browser flows were rerun. Backend source, tests, schema, migrations and dependency locks are unchanged; the real 23-test MariaDB evidence is retained from the prior verified run, not claimed as a new database run.
 
 | Verification | Actual result | Evidence |
 |---|---|---|
 | Fresh disposable MariaDB 11.8.6 migration + backend suite on Node 22.23.3 | **23 tests passed; 0 failed/skipped** | `verification/backend-tests.txt` |
-| Mobile TypeScript + automated suite + Expo dependency alignment | **15 tests passed; 0 failed/skipped**, type/alignment pass | `verification/mobile-check.txt` |
+| Mobile TypeScript + automated suite + Expo dependency alignment | **20 tests passed; 0 failed/skipped**, type/alignment pass | `verification/mobile-check.txt` |
 | Expo Doctor | **20/20 passed** | `verification/expo-doctor.txt` |
 | Android + iOS JavaScript/assets export | Passed | `verification/platform-export.txt` |
 | Native Android prebuild, no dependency install | Passed | `verification/android-prebuild.txt` |
@@ -25,6 +27,8 @@ Real temporary MariaDB tests exercise gated first owner/registration, real passw
 Domain tests cover renewal calculations and validation. Additional worker tests exercise **501-member reminder pagination/idempotency** and the stale-expiry compare-and-set condition. SMTP and Expo provider calls are injected/mocked where named; they are not evidence of delivery to a mailbox/device.
 
 ## Mobile and browser coverage
+
+The current suite has 20 mobile tests. New checks cover role-restricted admin navigation, isolated sample owner/staff access, confirmation-gated sample review, real weekly activity derivation and interactive switches without a disabled ancestor. Browser extended checks exercise class book/cancel, measurement/profile sample saves, password confirmation validation, preference save, support/history and read state. Owner browser QA exercises the management landing screen, disabled approval before confirmation, sample approval after confirmation, exercise add/remove, settings, members and support. All final runs reported no page/console errors. These sample actions are not evidence of actual money, SMTP or push delivery.
 
 Automated checks exercise isolated demo behavior, workout/payment state handling, API origin/auth-failure behavior, native auth/tab structure, React Native child-guard regressions and build-script/configuration invariants. They are not native UI automation.
 

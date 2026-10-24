@@ -2,6 +2,8 @@
 
 ## Mobile
 
+Version 2.1 implements the approved Manrope/navy/blue design in shared Typography/UI/Visuals components. Home training reads published workouts; the weekly panel derives completed sessions from actual activity. Owner/staff workspace is role-gated and included in mobile, following the latest scope. First-owner setup remains private-token gated. Explicit owner demo is memory-only, with sample-only review actions.
+
 `App.tsx` composes native stack/tab navigation, launch state, reset linking and allowlisted notification routing. `src/Session.tsx` owns live session hydration, refresh locking, API origin, logout and the separate opt-in demo. Refresh credentials/origin are stored in SecureStore on native devices; access credentials are held in memory. Live API failures remain visible errors with retry rather than generating paid/member sample state.
 
 `src/screens/` separates auth, dashboard/profile, training/classes, payment, settings and role-restricted owner/staff workflows. `src/components/UI.tsx` contains navy/blue cards, fields, buttons, loaders and errors. Resource loading is bounded by client timeouts. Refresh loads fresh dashboard data; session expiry/revocation returns to auth.

@@ -68,7 +68,7 @@ Use a restricted runtime DB user; consider a separate migrator account in produc
 
 1. Connect to the real configured API. If no owner exists, the connection screen offers first-owner setup.
 2. Enter the private bootstrap token directly in the app, owner details and a matching password/confirmation of at least 10 characters.
-3. Open **Profile → Owner tools → settings**. Publish actual contacts, address, hours, privacy/terms text and payment instructions.
+3. Open **Profile → Owner workspace → Gym settings**. Publish actual contacts, address, hours, privacy/terms text and payment instructions.
 4. Add real PKR plans and receiving options. Add real workouts, classes and announcements if used.
 5. Remove `BOOTSTRAP_TOKEN` from the server environment and restart the API. Setup cannot create another owner once one exists.
 6. Registration opens only after required real gym configuration is supplied. There is no seeded owner password.

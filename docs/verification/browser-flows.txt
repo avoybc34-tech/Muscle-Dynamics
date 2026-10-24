@@ -2,4 +2,5 @@ Workout detail, set entry, complete: PASS
 Plan, checkout, bundled proof and sample pending: PASS
 Profile > Settings > Notification settings: PASS
 Demo exit and separate login screen: PASS
+Password visibility toggle: PASS
 Page exceptions: []

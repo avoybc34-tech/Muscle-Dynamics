@@ -1,5 +1,6 @@
+import { Text } from "../components/Typography";
 import React, { useEffect, useState, useRef } from "react";
-import { View, Text, Alert, Pressable } from "react-native";
+import { View, Alert, Pressable } from "react-native";
 import {
   Screen,
   Card,
@@ -28,9 +29,7 @@ const sections = [
 ];
 export function Owner() {
   const s = useSession(),
-    [section, setSection] = useState(
-      s.user?.role === "STAFF" ? "support" : "settings",
-    ),
+    [section, setSection] = useState("overview"),
     [rows, setRows] = useState<any[]>([]),
     [more, setMore] = useState(false),
     [form, setForm] = useState<Record<string, string>>({}),
@@ -45,6 +44,7 @@ export function Owner() {
   selectedSection.current = section;
   async function reload() {
     setError("");
+    if (section === "overview") return;
     try {
       const r = await s.api<any>("admin/" + section);
       if (selectedSection.current !== section) return;
@@ -152,7 +152,9 @@ export function Owner() {
       await s.fetchConfig();
       Alert.alert(
         "Saved",
-        "Actual gym data was saved. No payment was automatically verified.",
+        s.demo
+          ? "Sample changes saved locally. No live gym records changed."
+          : "Actual gym data was saved. No payment was automatically verified.",
       );
     } catch (e) {
       setError((e as Error).message);
@@ -181,28 +183,91 @@ export function Owner() {
       setBusy(false);
     }
   }
+  const labels: Record<string, string> = {
+    settings: "Gym settings",
+    plans: "Membership plans",
+    accounts: "Receiving accounts",
+    payments: "Payment reviews",
+    workouts: "Training plans",
+    classes: "Class schedule",
+    announcements: "Announcements",
+    support: "Support inbox",
+    members: "Member access",
+    audit: "Audit history",
+  };
+  if (section === "overview")
+    return (
+      <Screen
+        title={
+          s.user?.role === "STAFF" ? "Staff workspace." : "Your gym, in order."
+        }
+        subtitle={
+          s.demo
+            ? "Sample management only. No real business records or payments."
+            : "Configuration and decisions, separate from member training."
+        }
+      >
+        <Card>
+          <H2>
+            {s.user?.role === "STAFF"
+              ? "Restricted staff access"
+              : "Owner workspace"}
+          </H2>
+          <P muted>
+            {s.user?.role === "STAFF"
+              ? "Member lookup and support. Financial decisions remain owner-only."
+              : "Manage your actual gym, review funds and support your members."}
+          </P>
+        </Card>
+        <Card>
+          {(s.user?.role === "STAFF"
+            ? ["members", "support"]
+            : ["payments", "members", "plans", "accounts"]
+          ).map((x) => (
+            <Row
+              key={x}
+              icon={x === "payments" ? "receipt-outline" : "people-outline"}
+              title={labels[x]}
+              onPress={() => setSection(x)}
+            />
+          ))}
+        </Card>
+        {s.user?.role === "OWNER" ? (
+          <>
+            <Card>
+              {["workouts", "classes", "announcements"].map((x) => (
+                <Row
+                  key={x}
+                  icon="barbell-outline"
+                  title={labels[x]}
+                  onPress={() => setSection(x)}
+                />
+              ))}
+            </Card>
+            <Card>
+              {["support", "settings", "audit"].map((x) => (
+                <Row
+                  key={x}
+                  icon="settings-outline"
+                  title={labels[x]}
+                  onPress={() => setSection(x)}
+                />
+              ))}
+            </Card>
+          </>
+        ) : null}
+      </Screen>
+    );
   return (
     <Screen
-      title={s.user?.role === "STAFF" ? "Staff workspace." : "Owner workspace."}
+      title={labels[section] || "Gym workspace"}
       subtitle="Actual gym settings and financial decisions. Never approve from a screenshot alone."
     >
-      <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 8 }}>
-        {(s.user?.role === "STAFF" ? ["support", "members"] : sections).map(
-          (x) => (
-            <Pressable
-              key={x}
-              onPress={() => setSection(x)}
-              style={{
-                padding: 11,
-                borderRadius: 14,
-                backgroundColor: section === x ? T.accent : T.raised,
-              }}
-            >
-              <Text style={{ color: section === x ? T.bg : T.text }}>{x}</Text>
-            </Pressable>
-          ),
-        )}
-      </View>
+      <Button
+        title="Back to workspace"
+        outline
+        onPress={() => setSection("overview")}
+      />
       {!!error && <ErrorBox message={error} retry={reload} />}
       {!!fields[section] && (
         <Card>
@@ -240,7 +305,23 @@ export function Owner() {
             ) : (
               <Input
                 key={k}
-                label={k.replace(/([A-Z])/g, " $1")}
+                label={
+                  (
+                    {
+                      pricePKR: "Price · PKR",
+                      durationDays: "Duration · days",
+                      durationMinutes: "Duration · minutes",
+                      startsAt: "Starts at · ISO date",
+                      endsAt: "Ends at · ISO date",
+                      accountName: "Account title",
+                      accountNumber: "Account number",
+                      gymName: "Gym name",
+                      privacyText: "Privacy policy",
+                      termsText: "Membership terms",
+                      paymentInstructions: "Payment instructions",
+                    } as Record<string, string>
+                  )[k] || k.replace(/([A-Z])/g, " $1")
+                }
                 value={form[k] || ""}
                 onChange={(v) => change(k, v)}
                 multiline={[
@@ -261,10 +342,14 @@ export function Owner() {
               />
             ),
           )}
-          <Button title="Save actual gym data" busy={busy} onPress={save} />
+          <Button
+            title={s.demo ? "Save sample gym data" : "Save actual gym data"}
+            busy={busy}
+            onPress={save}
+          />
         </Card>
       )}
-      {!!(section === "payments") &&
+      {!!(section === "payments" && !review) &&
         rows.map((p) => (
           <Card key={p.id}>
             <Badge value={p.status} />
@@ -313,17 +398,24 @@ export function Owner() {
             onChange={setFunds}
           />
           <Button
-            title="Approve & activate membership"
+            title={
+              s.demo
+                ? "Preview sample approval"
+                : "Approve & activate membership"
+            }
             busy={busy}
+            disabled={!funds || ref.trim().length < 3 || note.trim().length < 3}
             onPress={() =>
-              Alert.alert(
-                "Approve real payment?",
-                "This activates or changes membership. Confirm only actual settled funds.",
-                [
-                  { text: "Cancel", style: "cancel" },
-                  { text: "Approve", onPress: () => decide("APPROVED") },
-                ],
-              )
+              s.demo
+                ? decide("APPROVED")
+                : Alert.alert(
+                    "Approve real payment?",
+                    "This activates or changes membership. Confirm only actual settled funds.",
+                    [
+                      { text: "Cancel", style: "cancel" },
+                      { text: "Approve", onPress: () => decide("APPROVED") },
+                    ],
+                  )
             }
           />
           <Button

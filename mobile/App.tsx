@@ -1,14 +1,19 @@
+import { Owner } from "./src/screens/Owner";
+import { Text } from "./src/components/Typography";
 import "react-native-gesture-handler";
 import React, { useEffect, useRef, useState } from "react";
 import {
   View,
-  Text,
   ActivityIndicator,
   Animated,
   AccessibilityInfo,
   AppState,
+  useWindowDimensions,
 } from "react-native";
-import { SafeAreaProvider } from "react-native-safe-area-context";
+import {
+  useSafeAreaInsets,
+  SafeAreaProvider,
+} from "react-native-safe-area-context";
 import {
   NavigationContainer,
   createNavigationContainerRef,
@@ -54,7 +59,7 @@ import {
   Policies,
   Updates,
 } from "./src/screens/Settings";
-import { Owner } from "./src/screens/Owner";
+
 SplashScreen.preventAutoHideAsync().catch(() => {});
 const Stack = createNativeStackNavigator(),
   Tab = createBottomTabNavigator(),
@@ -129,6 +134,9 @@ function Launch() {
   );
 }
 function Tabs() {
+  const insets = useSafeAreaInsets(),
+    { width } = useWindowDimensions(),
+    tabWidth = Math.min(width - 24, 556);
   const icons: Record<string, keyof typeof Ionicons.glyphMap> = {
     Home: "home-outline",
     Workouts: "barbell-outline",
@@ -143,13 +151,42 @@ function Tabs() {
         tabBarActiveTintColor: T.accent,
         tabBarInactiveTintColor: T.muted,
         tabBarStyle: {
-          backgroundColor: T.bg,
-          borderTopColor: T.line,
+          position: "absolute",
+          width: tabWidth,
+          left: (width - tabWidth) / 2,
+          bottom: Math.max(insets.bottom, 12),
+          height: 76,
+          backgroundColor: T.raised,
+          borderWidth: 1,
+          borderColor: T.line,
+          borderTopWidth: 1,
+          borderRadius: 29,
           paddingTop: 9,
+          paddingBottom: 7,
+          elevation: 0,
         },
-        tabBarLabelStyle: { fontSize: 10, fontWeight: "700" },
-        tabBarIcon: ({ color, size }) => (
-          <Ionicons name={icons[route.name]} size={size} color={color} />
+        tabBarLabelStyle: {
+          fontSize: 9,
+          fontFamily: "Manrope600",
+          marginTop: 3,
+        },
+        tabBarIcon: ({ color, size, focused }) => (
+          <View
+            style={{
+              height: 32,
+              width: 34,
+              borderRadius: 17,
+              alignItems: "center",
+              justifyContent: "center",
+              backgroundColor: focused ? T.primary : "transparent",
+            }}
+          >
+            <Ionicons
+              name={icons[route.name]}
+              size={23}
+              color={focused ? "#fff" : color}
+            />
+          </View>
         ),
       })}
     >
@@ -163,7 +200,14 @@ function Tabs() {
 }
 function Navigator() {
   const s = useSession(),
-    [fonts, fontError] = useFonts(Ionicons.font),
+    [fonts, fontError] = useFonts({
+      ...Ionicons.font,
+      Manrope400: require("./assets/fonts/Manrope-400.ttf"),
+      Manrope500: require("./assets/fonts/Manrope-500.ttf"),
+      Manrope600: require("./assets/fonts/Manrope-600.ttf"),
+      Manrope700: require("./assets/fonts/Manrope-700.ttf"),
+      Manrope800: require("./assets/fonts/Manrope-800.ttf"),
+    }),
     [reduce, setReduce] = useState(false);
   const pending = useRef<string | null>(null);
   const handledResponses = useRef(new Set<string>());
@@ -252,6 +296,8 @@ function Navigator() {
           headerStyle: { backgroundColor: T.bg },
           headerTintColor: T.text,
           headerShadowVisible: false,
+          headerBackButtonDisplayMode: "minimal",
+          headerTitleStyle: { fontFamily: "Manrope700", fontSize: 15 },
           contentStyle: { backgroundColor: T.bg },
           animation: reduce ? "none" : "slide_from_right",
         }}
@@ -296,9 +342,9 @@ function Navigator() {
             <Stack.Screen name="Security" component={Security} />
             <Stack.Screen name="Support" component={Support} />
             <Stack.Screen name="Updates" component={Updates} />
-            {!!(s.user.role !== "MEMBER") && (
+            {s.user.role !== "MEMBER" ? (
               <Stack.Screen name="Owner" component={Owner} />
-            )}
+            ) : null}
           </>
         ) : (
           <>
@@ -323,14 +369,14 @@ function Navigator() {
               options={{ title: "Password recovery" }}
             />
             <Stack.Screen
+              name="OwnerSetup"
+              component={OwnerSetup}
+              options={{ title: "First owner setup" }}
+            />
+            <Stack.Screen
               name="Connection"
               component={Connection}
               options={{ title: "Gym connection" }}
-            />
-            <Stack.Screen
-              name="OwnerSetup"
-              component={OwnerSetup}
-              options={{ title: "First owner" }}
             />
           </>
         )}

@@ -1,6 +1,6 @@
+import { Text } from "../components/Typography";
 import React, { useEffect, useState } from "react";
-import { View, Text, Alert, Pressable } from "react-native";
-import { LinearGradient } from "expo-linear-gradient";
+import { View, Alert, Pressable } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import {
   Screen,
@@ -14,6 +14,8 @@ import {
   styles,
 } from "../components/UI";
 import { useSession } from "../Session";
+import { Brand, trainingImage } from "../components/Visuals";
+import { ImageBackground } from "react-native";
 import { T } from "../theme";
 import { send } from "../services/client";
 const emailValid = (v: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
@@ -21,43 +23,40 @@ export function Welcome({ navigation: n }: any) {
   const s = useSession();
   return (
     <Screen>
-      <View style={{ paddingTop: 45, gap: 35 }}>
-        <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
-          <View
-            style={{ backgroundColor: T.accent, padding: 13, borderRadius: 16 }}
-          >
-            <Text style={{ fontWeight: "900", fontSize: 22, color: T.bg }}>
-              MD
-            </Text>
-          </View>
-          <Text style={{ color: T.text, fontWeight: "800", letterSpacing: 2 }}>
-            MUSCLE{`\n`}DYNAMICS
-          </Text>
-        </View>
-        <LinearGradient
-          colors={["#20394a", "#111f31"]}
+      <View style={{ paddingTop: 12, gap: 24 }}>
+        <Brand />
+        <ImageBackground
+          source={trainingImage}
+          imageStyle={{ borderRadius: 28 }}
           style={{
-            borderRadius: 30,
-            padding: 30,
-            gap: 20,
-            minHeight: 260,
-            justifyContent: "space-between",
+            height: 285,
+            width: "100%",
+            borderRadius: 28,
+            overflow: "hidden",
+            justifyContent: "flex-end",
           }}
         >
-          <Ionicons name="barbell-outline" size={70} color={T.accent} />
-          <Label>YOUR STRONGER CHAPTER</Label>
-          <Text
+          <View
             style={{
-              color: T.text,
-              fontSize: 45,
-              fontWeight: "800",
-              lineHeight: 49,
-              letterSpacing: -2,
+              position: "absolute",
+              inset: 0,
+              backgroundColor: "rgba(6,11,19,0.60)",
             }}
-          >
-            Built by{`\n`}showing up.
-          </Text>
-        </LinearGradient>
+          />
+          <View style={{ padding: 25, gap: 12 }}>
+            <Label>YOUR GYM. YOUR MOMENTUM.</Label>
+            <Text
+              style={{
+                fontSize: 32,
+                lineHeight: 40,
+                fontWeight: "800",
+                color: T.text,
+              }}
+            >
+              A stronger routine.{"\n"}One place.
+            </Text>
+          </View>
+        </ImageBackground>
         <P muted>
           Your training, membership and progress. One focused space to keep
           moving forward.
@@ -79,6 +78,15 @@ export function Welcome({ navigation: n }: any) {
         <Pressable onPress={() => s.enterDemo()}>
           <Text style={{ color: T.muted, textAlign: "center", padding: 12 }}>
             Explore sample design · no account
+          </Text>
+        </Pressable>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel="Explore sample owner workspace"
+          onPress={() => s.enterDemo("OWNER")}
+        >
+          <Text style={{ color: T.muted, textAlign: "center", fontSize: 12 }}>
+            Explore owner workspace · sample data
           </Text>
         </Pressable>
       </View>
@@ -107,7 +115,9 @@ export function Connection({ navigation: n }: any) {
             const c = await s.connect(url);
             Alert.alert(
               "Connected",
-              c.gymName + " is ready for account access.",
+              c.ownerExists === false
+                ? "Gym setup is incomplete. Please contact your gym before creating an account."
+                : c.gymName + " server verified. Sign in to your account.",
             );
           } catch (e) {
             setError((e as Error).message);
@@ -116,13 +126,13 @@ export function Connection({ navigation: n }: any) {
           }
         }}
       />
-      {!!(s.config?.ownerExists === false) && (
+      {s.config?.ownerExists === false ? (
         <Button
           title="Set up first owner"
           outline
           onPress={() => n.navigate("OwnerSetup")}
         />
-      )}
+      ) : null}
       <Card>
         <P muted>
           Hosting is configured separately. Missing services are reported
@@ -352,6 +362,7 @@ export function Recovery({ navigation: n, route }: any) {
     </Screen>
   );
 }
+
 export function OwnerSetup() {
   const s = useSession();
   const [name, setName] = useState(""),

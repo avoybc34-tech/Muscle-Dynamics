@@ -1,0 +1,4 @@
+Owner sample review requires funds confirmation, then records sample decision: PASS
+Owner exercise add/remove forms: PASS
+Owner settings, members and support screens: PASS
+Page/console errors: []

@@ -1,5 +1,5 @@
 
-> muscle-dynamics-mobile@2.0.0 doctor
+> muscle-dynamics-mobile@2.1.0 doctor
 > npx --yes expo-doctor@1.21.5
 
 Running 20 checks on your project...

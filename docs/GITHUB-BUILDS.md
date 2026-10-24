@@ -25,3 +25,5 @@ The macOS job builds a device-targeted Release archive with code signing disable
 ## Important limits
 
 This workspace executed source checks, exports, native project generation and structural workflow lint. **It did not run GitHub Actions, Gradle assembly, CocoaPods/Xcode archive or physical-device installation.** Native build success remains an execution gate. Runner/provider versions and dependency advisories should be rechecked when you run it. The audit is intentionally reported rather than “fixed” by a forced incompatible Expo downgrade.
+
+If GitHub’s browser upload limit is reached, upload the extracted top-level folders in separate batches (mobile, backend, docs and .github), preserving their paths. Do not upload ZIP files, node_modules, native generated directories or environment secrets.

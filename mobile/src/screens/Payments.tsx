@@ -1,5 +1,6 @@
+import { Text } from "../components/Typography";
 import React, { useState, useEffect } from "react";
-import { View, Text, Image, Alert, Pressable } from "react-native";
+import { View, Image, Alert, Pressable } from "react-native";
 import { Asset } from "expo-asset";
 import * as ImagePicker from "expo-image-picker";
 import {
@@ -38,7 +39,7 @@ export function Plans({ navigation: n }: any) {
         />
       ) : (
         r.data.map((p, i) => (
-          <Card key={p.id} style={i === 0 ? { borderColor: "#427668" } : {}}>
+          <Card key={p.id} style={i === 0 ? { borderColor: "#315b96" } : {}}>
             <Label>{p.durationDays} DAYS</Label>
             <H2>{p.name}</H2>
             <Text style={{ color: T.text, fontSize: 34, fontWeight: "800" }}>
