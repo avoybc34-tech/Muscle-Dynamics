@@ -1,4 +1,16 @@
 @import url("/css/fonts.css");
+
+
+
+
+.brand-logo {
+  height: 100px;
+  width: auto;
+  object-fit: contain;
+  display: block;
+}
+
+
 :root {
   --ink: #111419;
   --paper: #f5f4f0;

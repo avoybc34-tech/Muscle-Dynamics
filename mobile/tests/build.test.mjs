@@ -1,10 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs/promises';
-import {backendOrigin,requireTestAcknowledgement,ensureTestSigning} from '../scripts/build-utils.mjs';
-test('blank API origin supports connecting after installation',()=>assert.equal(backendOrigin('  '),''));
-test('HTTPS API origin normalizes safely',()=>assert.equal(backendOrigin('https://gym.example.invalid/'),'https://gym.example.invalid'));
-test('database URLs, passwords, localhost, paths and newline injection are rejected',()=>{for(const value of ['mysql://user:password@localhost/gym','http://example.invalid','https://user:password@example.invalid','https://localhost','https://127.0.0.1','https://example.invalid/api','https://example.invalid/?token=secret','https://example.invalid/#x','https://example.invalid\nINJECT=value'])assert.throws(()=>backendOrigin(value),value);});
+import {requireTestAcknowledgement,ensureTestSigning} from '../scripts/build-utils.mjs';
 test('test acknowledgement cannot be omitted or treated as truthy text',()=>{for(const value of [undefined,'','false','1'])assert.throws(()=>requireTestAcknowledgement(value));assert.doesNotThrow(()=>requireTestAcknowledgement('true'));});
 test('Android release signing must explicitly use test key',()=>{ensureTestSigning("storeFile file('debug.keystore')\nbuildTypes { release { signingConfig signingConfigs.debug } }");assert.throws(()=>ensureTestSigning('release { signingConfig null }'));});
 test('application contains no EAS project identity and has matching native IDs',async()=>{const a=JSON.parse(await fs.readFile('app.json'));assert.equal(a.expo.name,'Muscle Dynamics');assert.equal(a.expo.ios.bundleIdentifier,a.expo.android.package);assert(!a.expo.extra?.eas);assert(a.expo.plugins.includes('expo-font'));});

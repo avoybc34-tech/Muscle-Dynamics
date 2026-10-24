@@ -1,0 +1,6 @@
+{
+  "version": 3,
+  "sources": [],
+  "sections": [
+    {"offset": {"line": 10, "column": 0}, "map": {"version":3,"sources":["file:///W:/Muscle%20Dynamics/app/page.jsx"],"sourcesContent":["import { redirect } from \"next/navigation\";\nexport default function Home() {\n  redirect(\"/index.html\");\n}\n"],"names":["Home"],"mappings":";;;;AAAA;AAAA;;AACe,SAASA;IACtB,IAAA,iMAAQ,EAAC;AACX"}}]
+}

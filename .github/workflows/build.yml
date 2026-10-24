@@ -1,4 +1,4 @@
-name: Build APK and unsigned IPA
+name: Build offline APK and unsigned IPA
 
 on:
   workflow_dispatch:
@@ -9,11 +9,6 @@ on:
         options: [both, android, ios]
         default: both
         required: true
-      backend_url:
-        description: Optional public HTTPS gym API origin (leave blank to connect inside app)
-        type: string
-        required: false
-        default: ''
       acknowledge_test_builds:
         description: 'I understand: IPA is UNSIGNED, APK uses a test key, security findings remain. Testing only.'
         type: boolean
@@ -30,7 +25,6 @@ concurrency:
 env:
   CI: 'true'
   EXPO_NO_TELEMETRY: '1'
-  EXPO_PUBLIC_API_URL: ${{ inputs.backend_url || vars.EXPO_PUBLIC_API_URL || '' }}
   ACK_TEST_BUILDS: ${{ inputs.acknowledge_test_builds }}
 
 defaults:
@@ -56,6 +50,8 @@ jobs:
       - run: npm ci --include=dev
       - run: npm run check
       - run: npm run doctor
+      - name: Verify offline JavaScript bundles
+        run: npx expo export --platform android --platform ios --output-dir .ci-export
       - name: Record unresolved advisories without unsafe automatic fixes
         run: node scripts/security-report.mjs
       - uses: actions/upload-artifact@v6

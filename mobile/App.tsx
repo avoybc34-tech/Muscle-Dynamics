@@ -6,7 +6,6 @@ import {
   ScrollView,
   Image,
   Alert,
-  Linking,
   KeyboardAvoidingView,
   Platform,
   ActivityIndicator,
@@ -17,10 +16,10 @@ import {
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import { StatusBar } from "expo-status-bar";
 import { Ionicons } from "@expo/vector-icons";
-import * as ImagePicker from "expo-image-picker";
+type PreviewAsset={uri:string;width:number;height:number;fileName:string;mimeType:string};
 import { GymProvider, useGym } from "./src/GymProvider";
 import { Logo, Button, Field, Head, Note, Badge, Empty, s, C } from "./src/ui";
-import { money, date, time } from "./src/api";
+import { money, date, time } from "./src/format";
 import type { Plan, Account, Payment, GymClass, Screen } from "./src/types";
 const message = (e: unknown) =>
   Alert.alert(
@@ -28,34 +27,8 @@ const message = (e: unknown) =>
     e instanceof Error ? e.message : "Please try again.",
   );
 function Connect() {
-  const { connect } = useGym();
-  const [url, setUrl] = useState(""),
-    [busy, setBusy] = useState(false);
-  return (
-    <>
-      <Head
-        label="CONNECT TO YOUR GYM"
-        title="Your gym. One member space."
-        text="Enter your gym’s secure server URL. The gym owner gets this address after deploying on Render."
-      />
-      <Field label="Gym server URL" value={url} onChange={setUrl} />
-      <Note text="Use the https://…onrender.com address, not the admin page or an /api path. Never enter a password or setup token here." />
-      <Button
-        title="Connect to the gym"
-        busy={busy}
-        onPress={async () => {
-          setBusy(true);
-          try {
-            await connect(url);
-          } catch (e) {
-            message(e);
-          } finally {
-            setBusy(false);
-          }
-        }}
-      />
-    </>
-  );
+ const {connect,setScreen}=useGym();
+ return <><Head label="OFFLINE DESIGN PREVIEW" title="Explore your app." text="No API or account is needed. Every record is clearly labelled sample content. Changes stay in memory and reset on restart."/><Button title="Reset sample data and open dashboard" onPress={()=>{connect().catch(message);}}/><Button title="Preview welcome screen" outline onPress={()=>setScreen('welcome')}/><Note text="Real login, money transfers, password changes and messages are not connected. Do not enter personal information."/></>;
 }
 function Welcome() {
   const { setScreen, config } = useGym();
@@ -76,7 +49,7 @@ function Welcome() {
       />
       <Pressable onPress={() => setScreen("connect")}>
         <Text style={[s.link, { color: "#91A7C8" }]}>
-          Change gym connection
+          Preview settings
         </Text>
       </Pressable>
     </View>
@@ -119,8 +92,8 @@ function Auth() {
         title={signup ? "Make this your day one." : "Good to have you back."}
         text={
           signup
-            ? "Create your account. Choose a membership when you’re ready."
-            : "Your training and membership, all in one place."
+            ? "Sample signup layout. No real account will be created."
+            : "Sample login layout. No password is required; do not enter real credentials."
         }
       />
       {signup && !config?.registrationOpen && (
@@ -156,12 +129,12 @@ function Auth() {
           </Pressable>
           <View style={[s.row, { marginBottom: 20 }]}>
             <Pressable
-              onPress={() => Linking.openURL(server + "/legal.html#terms")}
+              onPress={() => Alert.alert("Preview terms", "Sample design only. Real gym terms will be configured with the future backend.")}
             >
               <Text style={s.link}>Read terms</Text>
             </Pressable>
             <Pressable
-              onPress={() => Linking.openURL(server + "/legal.html#privacy")}
+              onPress={() => Alert.alert("Preview privacy", "Nothing is sent to a server. Do not enter personal data.")}
             >
               <Text style={s.link}>Privacy notice</Text>
             </Pressable>
@@ -194,7 +167,7 @@ function Auth() {
         />
       )}
       <Pressable onPress={() => setScreen("connect")}>
-        <Text style={[s.link, { color: C.muted }]}>Change gym connection</Text>
+        <Text style={[s.link, { color: C.muted }]}>Preview settings</Text>
       </Pressable>
     </>
   );
@@ -418,7 +391,7 @@ function Pay() {
       instructions: string;
     } | null>(null),
     [accountId, setAccountId] = useState(""),
-    [asset, setAsset] = useState<ImagePicker.ImagePickerAsset | null>(null),
+    [asset, setAsset] = useState<PreviewAsset | null>(null),
     [note, setNote] = useState(""),
     [paid, setPaid] = useState(false),
     [busy, setBusy] = useState(false);
@@ -446,24 +419,9 @@ function Pay() {
     }
   }
   async function pick() {
-    try {
-      const r = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ["images"],
-        quality: 0.85,
-      });
-      if (!r.canceled && r.assets[0]) {
-        if ((r.assets[0].fileSize || 0) > 5 * 1024 * 1024) {
-          Alert.alert(
-            "Image too large",
-            "Choose a screenshot smaller than 5 MB.",
-          );
-          return;
-        }
-        setAsset(r.assets[0]);
-      }
-    } catch (e) {
-      message(e);
-    }
+    const source=Image.resolveAssetSource(require('./assets/sample-receipt.png'));
+    if(!source){Alert.alert('Sample receipt','Reload the preview to restore its bundled sample image.');return;}
+    setAsset({uri:source.uri,width:600,height:800,fileName:'SAMPLE-NOT-A-PAYMENT.png',mimeType:'image/png'});
   }
   async function submit() {
     if (
@@ -474,7 +432,7 @@ function Pay() {
     ) {
       Alert.alert(
         "Complete your submission",
-        "Attach a receipt, add transaction details, and confirm that you actually paid the gym.",
+        "Use the sample receipt, add sample notes, and tick the preview checkbox. Do not pay anything.",
       );
       return;
     }
@@ -494,8 +452,8 @@ function Pay() {
       setPayment(null);
       setScreen("payments");
       Alert.alert(
-        "Receipt submitted",
-        "The gym will verify the actual receiving account and notify you of its decision.",
+        "Preview receipt saved",
+        "Sample pending state only. No receipt was uploaded and no real payment occurred.",
       );
     } catch (e) {
       message(e);
@@ -552,8 +510,8 @@ function Pay() {
           />
         )}
         <Text style={s.p}>
-          You will transfer the money outside this app. No membership is
-          activated until the gym verifies the actual payment.
+          This is a sample checkout design. Do not transfer money. Nothing
+          is submitted to a gym or payment service.
         </Text>
       </>
     );
@@ -584,7 +542,7 @@ function Pay() {
           ))}
         {!!a.note && <Text style={s.p}>{a.note}</Text>}
       </View>
-      <Note text="Transfer the exact amount outside this app. Do not share bank passwords, PINs or OTPs. The screenshot is submitted for verification, not automatic approval." />
+      <Note text="Sample receipt preview only. No transfer, upload or verification occurs. Do not enter personal or financial information." />
       {asset && (
         <Image
           source={{ uri: asset.uri }}
@@ -593,7 +551,7 @@ function Pay() {
         />
       )}
       <Button
-        title={asset ? "Choose another receipt" : "Choose receipt screenshot"}
+        title={asset ? "Use sample receipt again" : "Attach sample receipt"}
         outline
         onPress={pick}
       />
@@ -603,7 +561,7 @@ function Pay() {
         </Text>
       )}
       <Field
-        label="Transaction reference / sender details"
+        label="Sample reference / notes — no personal details"
         value={note}
         onChange={setNote}
       />
@@ -619,11 +577,11 @@ function Pay() {
           color={C.blue}
         />
         <Text style={[s.small, { flex: 1, fontSize: 11 }]}>
-          I have actually paid the gym, and this receipt belongs to this
-          transaction.
+          I understand this is sample content. No money was paid and no
+          real receipt will be uploaded.
         </Text>
       </Pressable>
-      <Button title="Send for verification" busy={busy} onPress={submit} />
+      <Button title="Preview pending state" busy={busy} onPress={submit} />
     </>
   );
 }
@@ -641,8 +599,7 @@ function Payments() {
         <>
           <Image
             source={{
-              uri: server + "/api/files/" + view,
-              headers: { Authorization: "Bearer " + token },
+              ...Image.resolveAssetSource(require("./assets/sample-receipt.png")),
             }}
             style={s.photo}
             resizeMode="contain"
@@ -685,11 +642,11 @@ function Payments() {
               />
             )}
             <Button
-              title="Share request record"
+              title="Share SAMPLE preview record"
               outline
               onPress={() => {
                 Share.share({
-                  message: `MUSCLE DYNAMICS — PAYMENT REQUEST RECORD\nNot a tax invoice or bank confirmation.\n\nReference: ${p.reference}\nPlan: ${p.planName}\nAmount: ${money(p.amountPaise)}\nStatus: ${p.status}\nGym note: ${p.adminNote || "—"}`,
+                  message: `MUSCLE DYNAMICS — OFFLINE SAMPLE RECORD\nSAMPLE ONLY. No payment occurred. Not a tax invoice or bank confirmation.\n\nReference: ${p.reference}\nPlan: ${p.planName}\nAmount: ${money(p.amountPaise)}\nStatus: ${p.status}\nGym note: ${p.adminNote || "—"}`,
                 }).catch(message);
               }}
             />
@@ -832,10 +789,10 @@ function Classes() {
       await refresh();
       await load();
       Alert.alert(
-        booking ? "Cancelled" : "You’re booked",
+        booking ? "Sample booking cancelled" : "Sample booking added",
         booking
-          ? "Your spot has been released."
-          : "Your booking is confirmed. We’ll see you at the gym.",
+          ? "The sample booking was removed from this preview."
+          : "Preview only. No real class reservation was made.",
       );
     } catch (e) {
       message(e);
@@ -964,8 +921,8 @@ function Support() {
               setSubject("");
               setText("");
               Alert.alert(
-                "Message sent",
-                "The gym can reply from its support inbox.",
+                "Sample message saved",
+                "Preview only. Nothing was sent to a gym or support inbox.",
               );
             } catch (e) {
               message(e);
@@ -1028,7 +985,7 @@ function Profile() {
                 { name, phone },
               );
               setUser(u);
-              Alert.alert("Saved", "Your profile is up to date.");
+              Alert.alert("Saved", "Sample profile updated in memory only.");
             } catch (e) {
               message(e);
             } finally {
@@ -1040,13 +997,13 @@ function Profile() {
       <View style={s.panel}>
         <Text style={s.h2}>Change your password</Text>
         <Field
-          label="Current password"
+          label="Sample current password — do not use a real password"
           value={current}
           onChange={setCurrent}
           secure
         />
         <Field
-          label="New password · 10+ characters"
+          label="Sample new password — changes are disabled"
           value={newPassword}
           onChange={setNewPassword}
           secure
@@ -1088,13 +1045,13 @@ function Profile() {
       <Button
         title="Membership terms & privacy"
         outline
-        onPress={() => Linking.openURL(server + "/legal.html#terms")}
+        onPress={() => Alert.alert("Preview terms", "Sample design only. Real gym terms will be configured with the future backend.")}
       />
       {user?.role !== "MEMBER" && (
         <Button
           title="Open the admin website"
           outline
-          onPress={() => Linking.openURL(server + "/admin.html")}
+          onPress={() => Alert.alert("Offline preview", "Admin/backend is not included in this design-only build.")}
         />
       )}
       <Button
@@ -1120,6 +1077,7 @@ const tabs = [
 ] as const;
 function Main() {
   const { loading, screen, setScreen, user, refresh } = useGym();
+  const [showScreens,setShowScreens]=useState(false);
   const [refreshing, setRefreshing] = useState(false);
   useEffect(() => {
     const sub = AppState.addEventListener("change", (state) => {
@@ -1175,6 +1133,11 @@ function Main() {
             </Pressable>
           )
         )}
+      </View>
+      <View style={{backgroundColor:'#e9f0ff',paddingHorizontal:16,paddingVertical:8}}>
+        <Text style={{fontSize:10,fontWeight:'800',color:'#174394'}}>OFFLINE PREVIEW · SAMPLE DATA · NO REAL PAYMENTS</Text>
+        <Pressable accessibilityRole="button" onPress={()=>setShowScreens(!showScreens)}><Text style={{color:'#174394',paddingVertical:5,fontWeight:'700'}}>Browse all screens {showScreens?'−':'+'}</Text></Pressable>
+        {showScreens&&<ScrollView horizontal showsHorizontalScrollIndicator={false}>{(['home','welcome','login','signup','membership','plans','payments','progress','classes','notifications','support','profile','connect'] as Screen[]).map(to=><Pressable key={to} onPress={()=>setScreen(to)} style={{padding:9,marginRight:6,borderRadius:8,backgroundColor:to===screen?'#c9dbff':'white'}}><Text style={{fontSize:12,color:'#123764'}}>{to==='connect'?'Reset preview':to}</Text></Pressable>)}</ScrollView>}
       </View>
       <KeyboardAvoidingView
         style={{ flex: 1 }}

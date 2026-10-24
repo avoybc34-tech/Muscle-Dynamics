@@ -1,19 +1,11 @@
-# Test builds, not production security approval
+# Offline design-preview security limitations
 
-Latest checked dependency graph reports **15 high**, 0 moderate, 0 critical package-chain findings. Counts may change; every workflow run saves the current `npm audit` JSON and a visible summary.
+This is a clearly labelled test/demo, not a production gym or payment service. The runtime has no API transport or remote login, no persistent session storage, no receipt picker and no real payment gateway. All sample edits exist in memory and reset when restarted. Do not enter real personal information or passwords.
 
-Known upstream roots at preparation time:
-- `braces <=3.0.3`: nested-pattern stack-exhaustion DoS (GHSA-vfj7-8cjw-p6xm), affecting Metro/micromatch/React Native/Expo tooling chains.
-- `node-forge <=1.4.0`: RSA signature-verification issue (GHSA-86w9-cpqp-85rv), affecting Expo CLI/signing tooling chains.
+Latest npm audit: **5 high / 0 moderate / 0 critical** package-chain findings in the locked mobile graph. Affected package chains include Expo CLI/code-signing tooling, node-forge and zod. Counts can change; every workflow run saves the current audit and visible summary. Do not force an incompatible dependency downgrade or claim offline mode makes toolchain advisories harmless. No audit fix --force or legacy-peer-deps workaround was applied.
 
-No compatible patched release was available in those lines at the earlier inspection. The automatic force suggestion downgraded Expo/RN to an incompatible set and was NOT applied. This new repository also does not run `audit fix --force` or `--legacy-peer-deps`, falsify the audit, or hide failed dependency checks. Developer review/compatible fixes remain required. Avoid exposing Metro to untrusted networks or accepting untrusted signing inputs. No claim is made that tooling placement makes advisories harmless.
+GitHub controls: manual dispatch only, test-build acknowledgement, read-only repository permissions, no persisted checkout credentials, separate native artifacts/logs and a security report. Source is installed from its lockfile. No Apple/Expo login, signing secret, backend URL or DB credentials are requested. No automatic store upload/publishing.
 
-Other controls:
-- Workflow dispatch only, explicit test acknowledgement, read-only repository permissions, and no persisted checkout credentials.
-- No Apple/Expo login or signing secrets requested. No automatic store upload or publishing.
-- Source is freshly checked out and installed from the lockfile; generated native projects are not committed.
-- APK signing is checked and deliberately labelled **public test key**, not a production identity. IPA signing is disabled and labelled **UNSIGNED**.
-- API input accepts only a public HTTPS origin without credentials/query/path/newlines; the URL is compiled public configuration, not a place for secrets.
-- Local environments, native outputs, signing keys and credentials are ignored; the delivered source ZIP contains no such secrets.
+Android uses a publicly known test/debug signing identity. IPA has signing disabled. Neither artifact is production/store-ready. Use valid private signing, owned identifiers, legal/privacy flows, reviewed dependencies and physical-device tests before any future production release. Native compilation is not verified until a real Actions job succeeds.
 
-Before production: resolve/review advisories, set an owned app identity/private signing, test both platforms physically, implement any store-required account-deletion/privacy flows, configure the actual secured backend, and review gym legal/payment/retention policies. No account-deletion automation, push/email notifications or card gateway was added in this build-cleanup task.
+The OS share sheet can be opened only by the user for a sample request record. The sample receipt is bundled locally and labelled NOT A PAYMENT; no gallery/photo access is needed. There is no automatic email, push notification, bank transfer, support delivery or real password change.

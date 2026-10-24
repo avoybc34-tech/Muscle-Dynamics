@@ -22,15 +22,6 @@
       }
     },
     "plugins": [
-      "expo-secure-store",
-      [
-        "expo-image-picker",
-        {
-          "photosPermission": "Choose a payment receipt to send securely to your gym for verification.",
-          "cameraPermission": false,
-          "microphonePermission": false
-        }
-      ],
       "expo-font"
     ]
   }

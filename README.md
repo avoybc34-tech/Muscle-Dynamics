@@ -1,60 +1,46 @@
-# Muscle Dynamics — FULL website + admin + member portal + app
+# Muscle Dynamics — OFFLINE APP DESIGN + GitHub APK / unsigned IPA
 
-**This is the combined project, not the previous app-only ZIP.** Deploy the website/API/private MariaDB on **Render**. Build the Android TEST APK and unsigned iPhone IPA on **GitHub Actions**. Both website and app use the same gym backend.
+**No API. No database. No hosting setup. No BAT/CMD files. No PC server.**
 
-## No npm on your PC
+This is a clean, app-only design preview. The installed app opens directly on a sample member dashboard. A persistent **OFFLINE PREVIEW / SAMPLE DATA** banner and **Browse all screens** control let you review the designs without a real login.
 
-You do **not** need to run npm, install Node, keep HeidiSQL open, or keep your PC switched on. Render installs/runs the website server and database. GitHub's runners install/build the mobile app. The website is plain HTML/CSS/JS backed by the included API; it is **not** a static-only site.
+## Build through GitHub — browser only
 
-### 1. Upload the complete project
+1. Extract this ZIP. Create a new private GitHub repository. Upload the **contents** of `muscle-dynamics-design-preview/`, not the enclosing folder or the ZIP itself. At repository root you must see `mobile/` and `.github/workflows/build.yml`.
+2. Confirm the workflow file exists. Windows can hide `.github`. If upload skipped it, use **Add file → Create new file**, name it `.github/workflows/build.yml`, and paste the complete included workflow. Commit it to your default branch. GitHub may require workflow permission for the uploading account.
+3. Open **Actions → Build offline APK and unsigned IPA → Run workflow**. Choose Android, iOS, or both. Check the test-build acknowledgement. **No backend URL or secrets are requested.** If needed enable Actions for the repository.
+4. Wait for source checks and native build jobs. Open the successful run and scroll to **Artifacts**:
+   - `Muscle-Dynamics-Android-TEST-APK`: download/unzip and install the `.apk` on a compatible Android device. Release JS is bundled; no Metro, Expo login or API is needed. Uses a public test signing key, not production signing.
+   - `Muscle-Dynamics-iPhone-UNSIGNED-IPA`: download/unzip the device `.ipa`. **Unsigned IPA is NOT normally installable until separately signed/provisioned.** This is not a TestFlight/App Store build. This workflow does not bypass Apple signing.
+   - Separate build logs and a security audit report are uploaded. Files expire after 7 days; download promptly. Each native file includes a SHA256 checksum and signing notice.
 
-Extract the ZIP → create a private GitHub repository → upload the **contents** of `muscle-dynamics-full/`. `render.yaml`, `package.json`, `public/`, `mobile/`, and `.github/` go at repository root. Upload in batches if necessary. Confirm `.github/workflows/build.yml` exists; if hidden folders were skipped, use **Add file → Create new file** with that exact path and paste the workflow from the ZIP.
+GitHub runner/minute limits and charges depend on your account, especially macOS/private repositories. Review billing before starting builds. No repository or Actions jobs have been run on your account by this chat. This ZIP is buildable source/workflow, NOT precompiled native binaries. The checks here do not guarantee a future native job succeeds on a changing hosted runner.
 
-### 2. Host website + database
+## What you can review offline
 
-Render → **New → Blueprint** → choose that repository → review charges → Apply. **Not Static Site.** Leave repository Root Directory unset. The Blueprint creates a paid Node web service, a paid private MariaDB service and two persistent disks. **Check current pricing before approving; this is not a free-hosting package.** No deployment, account action or charge has been performed for you.
+Dashboard; welcome/login/signup layouts; membership; sample PKR plans; payment history with approved/pending/rejected sample states; sample checkout/receipt/pending flow; progress; classes and local sample booking/cancellation; notifications; support; profile; reset preview.
 
-Open the web service's HTTPS URL when ready. Render runs installation, build, database startup waiting and migrations automatically. The database is hosted privately on Render—not your PC.
+Use **Browse all screens** at the top to jump to layouts. Main member tabs remain available. To see checkout, open Plans and choose a sample plan. The receipt button uses an included picture labelled **SAMPLE / NOT A PAYMENT**, never your photo library. All prices, names, records and activity are examples, not real business claims.
 
-### 3. Become owner and enter your real details
+- The sample member is present automatically. Login/signup buttons navigate locally; no account is created or authenticated. Do not enter real passwords or personal information.
+- No money is transferred, membership activated for real, receipt uploaded, support message sent, password changed or financial verification performed.
+- Changes stay only in app memory. Restart the app or use Reset preview to restore samples. No personal data is persisted or sent to a backend.
+- Sharing a sample request record, if tapped, opens the operating system's share sheet. Sharing only happens if you choose it; sample labels are retained. Build tooling itself needs internet to download dependencies. Expo development mode may use developer tooling networks; offline runtime refers to the bundled native preview.
 
-Privately copy `BOOTSTRAP_TOKEN` from the Render **web service → Environment**. Open `YOUR-RENDER-WEB-URL/setup.html`, create your owner login, then use `/admin.html` to enter real contacts, privacy/membership policies, payment instructions, membership plans/PKR prices, and bank/Easypaisa/JazzCash payment accounts. Member registration stays closed until required contact details and both policies are completed. There are no fabricated prices, bank details, members or payments in this package. Remove the bootstrap environment token after successful owner setup.
+## Change the design, then rebuild
 
-Website: `/` · Members: `/member.html` · Admin: `/admin.html` · Health: `/api/health`.
+- `mobile/App.tsx`: screen layouts and visible wording.
+- `mobile/src/ui.tsx`: navy/blue colours, styles, buttons and spacing.
+- `mobile/src/preview.ts`: clearly labelled sample screen data and local interactions.
+- `mobile/src/GymProvider.tsx`: offline screen/state provider.
+- `mobile/assets/`: icons and bundled sample receipt.
 
-### 4. Build and connect the mobile app
+Edit/commit files in GitHub, then rerun the manual workflow and install/download the new artifact. Installed standalone APKs do not update live from GitHub automatically. On Android an app with the same ID but a different signing key may require a deliberate uninstall before installing this test build; this can remove its local data.
 
-GitHub repository → **Actions → Build APK and unsigned IPA → Run workflow**. Choose Android/iOS/both; use your Render **HTTPS website origin** (no `/api` suffix), and acknowledge the testing/signing limitations. Download the artifacts after the jobs finish. See [`mobile/README.md`](mobile/README.md).
+## Future backend
 
-- **Android:** installable TEST APK, release-mode JS bundled, public test signing key. Not a Play Store/production-signing package.
-- **iPhone:** **UNSIGNED IPA, not directly installable** until separately signed/provisioned. No Apple/Expo credentials required for this build.
-- These are source/build workflows, **not prebuilt APK/IPA files**. Native jobs must still run in your GitHub account; no successful cloud build is claimed here.
+This release deliberately contains NO website/backend/database/tunnel files. Live authentication, actual gym settings, secure API credentials/session handling and real payment/member operations must be separately integrated and tested later. There is no fake promise that the preview is a functioning financial system. Keep real data out of these preview builds.
 
-## Included functionality
+## Checked and limitations
 
-Navy/blue Muscle Dynamics website; owner-only initial setup; member registration/login; restricted staff; editable plans/settings/payment accounts; manual PKR bank/Easypaisa/JazzCash/cash payment review; private receipts; rejection reasons and in-app notifications; memberships and same-plan renewals; owner review for plan changes; attendance; trainers; classes/bookings; announcements; support; CSV exports; audit trail. No automatic payment gateway, automatic renewals, refunds or prorating. Staff must verify permissions; owner verifies actual funds before approvals.
-
-## Read before launch
-
-- [Detailed Render deployment, troubleshooting, storage and backups](docs/RENDER.md)
-- [Owner operation guide](docs/OWNER.md)
-- [Mobile build/download instructions](mobile/README.md)
-- [Verification and limitations](VERIFICATION.md) · [Security notes](SECURITY.md)
-- [Editing guide](docs/EDITING.md) · [Third-party assets](docs/THIRD-PARTY.md)
-
-MariaDB is self-hosted with persistent storage, **not** a managed database. Arrange tested off-service database **and** receipt backups before real use. Existing business data is not included or migrated by uploading this ZIP. Keep credentials and member/payment records out of GitHub.
-
-## Repository layout
-
-```
-render.yaml                  complete paid web + private MariaDB Blueprint
-public/                      website / member / admin / setup HTML, CSS, JS, assets
-app/, lib/, prisma/          shared API, authentication, MariaDB schema/migrations
-scripts/render-*.mjs         automatic Render build/start; not owner PC commands
-docker/mariadb/              private MariaDB container
-mobile/                      Expo native app + build scripts
-.github/workflows/build.yml  manual GitHub Android/iPhone build
-docs/, tests/, database/     guides, tests, schema-only SQL reference
-```
-
-`package.json` and lockfiles are required for Render/GitHub automation. You do not run them locally. Do not remove them to make the site “HTML only”: member/admin functions need the server.
+Read `VERIFICATION.md` and `mobile/SECURITY.md`. Current patch-level Expo compatibility was corrected; TypeScript, 14 tests, Expo Doctor, native project generation and Android/iOS JS exports are checked. **Native cloud compilation, iPhone signing and physical-device testing have NOT run here.** Five high upstream audit findings remain at preparation time; no security certification or store readiness is claimed.

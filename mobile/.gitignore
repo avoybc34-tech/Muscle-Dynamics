@@ -24,3 +24,6 @@ reports/
 *.mobileprovision
 credentials.json
 .DS_Store
+
+.ci-export/
+.design-export/
