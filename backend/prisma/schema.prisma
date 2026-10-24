@@ -1,0 +1,262 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String          @id @default(cuid())
+  email         String          @unique @db.VarChar(191)
+  name          String          @db.VarChar(100)
+  phone         String          @db.VarChar(32)
+  passwordHash  String          @db.VarChar(255)
+  role          String          @default("MEMBER") @db.VarChar(16)
+  active        Boolean         @default(true)
+  avatarId      String?         @db.VarChar(64)
+  preferences   Json
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+  sessions      Session[]
+  resets        PasswordReset[]
+  membership    Membership?
+  payments      Payment[]
+  files         StoredFile[]
+  devices       Device[]
+  notifications Notification[]
+  activities    Activity[]
+  progress      Progress[]
+  bookings      Booking[]
+  tickets       Ticket[]
+}
+
+model Session {
+  id               String    @id @default(cuid())
+  userId           String
+  user             User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  accessHash       String    @unique @db.VarChar(64)
+  refreshHash      String    @unique @db.VarChar(64)
+  accessExpiresAt  DateTime
+  refreshExpiresAt DateTime
+  revokedAt        DateTime?
+  deviceName       String    @db.VarChar(120)
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  @@index([userId])
+}
+
+model PasswordReset {
+  id        String    @id @default(cuid())
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tokenHash String    @unique @db.VarChar(64)
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+}
+
+model GymSetting {
+  id    String @id @default("gym") @db.VarChar(32)
+  value Json
+}
+
+model Plan {
+  id           String       @id @default(cuid())
+  name         String       @db.VarChar(100)
+  description  String       @db.Text
+  pricePaise   Int
+  durationDays Int
+  benefits     Json
+  active       Boolean      @default(true)
+  createdAt    DateTime     @default(now())
+  memberships  Membership[]
+}
+
+model Account {
+  id      String  @id @default(cuid())
+  label   String  @db.VarChar(100)
+  type    String  @db.VarChar(20)
+  details Json
+  active  Boolean @default(true)
+}
+
+model Membership {
+  id        String    @id @default(cuid())
+  userId    String    @unique
+  user      User      @relation(fields: [userId], references: [id], onDelete: Restrict)
+  planId    String?
+  plan      Plan?     @relation(fields: [planId], references: [id], onDelete: Restrict)
+  planName  String    @default("") @db.VarChar(100)
+  startsAt  DateTime?
+  endsAt    DateTime?
+  status    String    @default("INACTIVE") @db.VarChar(20)
+  updatedAt DateTime  @updatedAt
+}
+
+model Payment {
+  id                String    @id @default(cuid())
+  userId            String
+  user              User      @relation(fields: [userId], references: [id], onDelete: Restrict)
+  reference         String    @unique @db.VarChar(40)
+  planId            String    @db.VarChar(64)
+  planSnapshot      Json
+  accountSnapshot   Json
+  amountPaise       Int
+  status            String    @default("DRAFT") @db.VarChar(20)
+  proofId           String?   @db.VarChar(64)
+  proofNote         String    @db.Text
+  reviewNote        String    @db.Text
+  verifiedReference String?   @unique @db.VarChar(191)
+  reviewedBy        String?   @db.VarChar(64)
+  createdAt         DateTime  @default(now())
+  submittedAt       DateTime?
+  reviewedAt        DateTime?
+
+  @@index([userId, createdAt])
+}
+
+model StoredFile {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Restrict)
+  kind      String   @db.VarChar(16)
+  filename  String   @unique @db.VarChar(100)
+  sha256    String   @db.VarChar(64)
+  createdAt DateTime @default(now())
+}
+
+model Workout {
+  id              String   @id @default(cuid())
+  title           String   @db.VarChar(120)
+  category        String   @db.VarChar(60)
+  description     String   @db.Text
+  durationMinutes Int
+  level           String   @db.VarChar(32)
+  exercises       Json
+  active          Boolean  @default(true)
+  createdAt       DateTime @default(now())
+}
+
+model Activity {
+  id               String    @id @default(cuid())
+  userId           String
+  user             User      @relation(fields: [userId], references: [id], onDelete: Restrict)
+  workoutId        String    @db.VarChar(64)
+  title            String    @db.VarChar(120)
+  exerciseSnapshot Json
+  sets             Json
+  startedAt        DateTime  @default(now())
+  completedAt      DateTime?
+  durationSeconds  Int       @default(0)
+
+  @@index([userId, startedAt])
+}
+
+model Progress {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Restrict)
+  weight    Float?
+  waist     Float?
+  notes     String   @db.Text
+  createdAt DateTime @default(now())
+
+  @@index([userId, createdAt])
+}
+
+model GymClass {
+  id        String    @id @default(cuid())
+  title     String    @db.VarChar(120)
+  trainer   String    @db.VarChar(100)
+  startsAt  DateTime
+  endsAt    DateTime
+  capacity  Int
+  cancelled Boolean   @default(false)
+  bookings  Booking[]
+}
+
+model Booking {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Restrict)
+  classId   String
+  gymClass  GymClass @relation(fields: [classId], references: [id], onDelete: Restrict)
+  createdAt DateTime @default(now())
+
+  @@unique([userId, classId])
+}
+
+model Device {
+  sessionId String   @db.VarChar(64)
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  token     String   @unique @db.VarChar(255)
+  platform  String   @db.VarChar(16)
+  enabled   Boolean  @default(true)
+  updatedAt DateTime @updatedAt
+}
+
+model Notification {
+  id        String    @id @default(cuid())
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Restrict)
+  eventKey  String    @unique @db.VarChar(191)
+  title     String    @db.VarChar(150)
+  message   String    @db.Text
+  category  String    @db.VarChar(32)
+  route     String    @db.VarChar(32)
+  readAt    DateTime?
+  createdAt DateTime  @default(now())
+  job       PushJob?
+}
+
+model PushJob {
+  id             String       @id @default(cuid())
+  notificationId String       @unique
+  notification   Notification @relation(fields: [notificationId], references: [id], onDelete: Cascade)
+  status         String       @default("PENDING") @db.VarChar(20)
+  attempts       Int          @default(0)
+  nextAttemptAt  DateTime     @default(now())
+  lockedAt       DateTime?
+  lastError      String?      @db.VarChar(100)
+
+  @@index([status, nextAttemptAt])
+}
+
+model PushReceipt {
+  id        String   @id @default(cuid())
+  ticketId  String   @unique @db.VarChar(100)
+  deviceId  String   @db.VarChar(64)
+  checkAt   DateTime
+  createdAt DateTime @default(now())
+}
+
+model Ticket {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Restrict)
+  subject   String   @db.VarChar(150)
+  message   String   @db.Text
+  reply     String   @db.Text
+  status    String   @default("OPEN") @db.VarChar(20)
+  createdAt DateTime @default(now())
+}
+
+model Announcement {
+  id        String   @id @default(cuid())
+  title     String   @db.VarChar(150)
+  message   String   @db.Text
+  createdAt DateTime @default(now())
+}
+
+model Audit {
+  id        String   @id @default(cuid())
+  actorId   String   @db.VarChar(64)
+  action    String   @db.VarChar(80)
+  targetId  String   @db.VarChar(64)
+  createdAt DateTime @default(now())
+}

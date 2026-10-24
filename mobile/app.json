@@ -2,12 +2,13 @@
   "expo": {
     "name": "Muscle Dynamics",
     "slug": "muscle-dynamics",
-    "version": "1.0.0",
+    "version": "2.0.0",
     "orientation": "portrait",
-    "userInterfaceStyle": "light",
+    "userInterfaceStyle": "dark",
     "platforms": [
       "android",
-      "ios"
+      "ios",
+      "web"
     ],
     "icon": "./assets/icon.png",
     "ios": {
@@ -18,11 +19,36 @@
       "package": "com.muscledynamics.members",
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#10243F"
+        "backgroundColor": "#080f1b"
       }
     },
     "plugins": [
-      "expo-font"
-    ]
+      "expo-font",
+      "expo-secure-store",
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/icon.png",
+          "imageWidth": 100,
+          "backgroundColor": "#080f1b"
+        }
+      ],
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/notification.png",
+          "color": "#69e3c0"
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Choose your profile photo or private payment receipt.",
+          "cameraPermission": false,
+          "microphonePermission": false
+        }
+      ]
+    ],
+    "scheme": "muscle-dynamics"
   }
 }

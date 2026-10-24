@@ -1,0 +1,4 @@
+Five main tabs at 320px: PASS (no horizontal page overflow)
+Five main tabs at 390px: PASS (no horizontal page overflow)
+Five main tabs at 768px: PASS (no horizontal page overflow)
+Page and console errors: []

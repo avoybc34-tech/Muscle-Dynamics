@@ -1,4 +1,4 @@
-name: Build offline APK and unsigned IPA
+name: Build Muscle Dynamics APK and unsigned IPA
 
 on:
   workflow_dispatch:
@@ -9,6 +9,16 @@ on:
         options: [both, android, ios]
         default: both
         required: true
+      backend_url:
+        description: Optional HTTPS API origin (or configure inside the app later)
+        type: string
+        default: ''
+        required: false
+      expo_project_id:
+        description: Optional real Expo project UUID for later push configuration
+        type: string
+        default: ''
+        required: false
       acknowledge_test_builds:
         description: 'I understand: IPA is UNSIGNED, APK uses a test key, security findings remain. Testing only.'
         type: boolean
@@ -25,6 +35,8 @@ concurrency:
 env:
   CI: 'true'
   EXPO_NO_TELEMETRY: '1'
+  EXPO_PUBLIC_API_URL: ${{ inputs.backend_url || '' }}
+  EXPO_PUBLIC_EAS_PROJECT_ID: ${{ inputs.expo_project_id || '' }}
   ACK_TEST_BUILDS: ${{ inputs.acknowledge_test_builds }}
 
 defaults:
@@ -50,7 +62,7 @@ jobs:
       - run: npm ci --include=dev
       - run: npm run check
       - run: npm run doctor
-      - name: Verify offline JavaScript bundles
+      - name: Verify mobile JavaScript bundles
         run: npx expo export --platform android --platform ios --output-dir .ci-export
       - name: Record unresolved advisories without unsafe automatic fixes
         run: node scripts/security-report.mjs
@@ -61,9 +73,46 @@ jobs:
           retention-days: 7
           if-no-files-found: error
 
+  backend:
+    name: MariaDB API integration tests
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    defaults:
+      run:
+        working-directory: backend
+    services:
+      mariadb:
+        image: mariadb:11.8
+        env:
+          MARIADB_DATABASE: muscle_dynamics_ci_test
+          MARIADB_USER: ci_test
+          MARIADB_PASSWORD: ephemeral-ci-only
+          MARIADB_ROOT_PASSWORD: ephemeral-ci-root-only
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="healthcheck.sh --connect --innodb_initialized"
+          --health-interval=5s --health-timeout=5s --health-retries=30
+    env:
+      DATABASE_URL: mysql://ci_test:ephemeral-ci-only@127.0.0.1:3306/muscle_dynamics_ci_test
+      NODE_ENV: test
+      UPLOAD_DIR: .test-artifacts/uploads
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22.23.3'
+          cache: npm
+          cache-dependency-path: backend/package-lock.json
+      - run: npm ci --include=dev
+      - run: npm run db:deploy
+      - run: npm run check
+
   android:
     name: Android — installable TEST APK
-    needs: checks
+    needs: [checks, backend]
     if: ${{ inputs.platform == 'both' || inputs.platform == 'android' }}
     runs-on: ubuntu-24.04
     timeout-minutes: 90
@@ -81,6 +130,14 @@ jobs:
           distribution: temurin
           java-version: '17'
       - run: npm ci --include=dev
+      - name: Optional configured Android push client
+        env:
+          GOOGLE_SERVICES_JSON_BASE64: ${{ secrets.GOOGLE_SERVICES_JSON_BASE64 }}
+        run: |
+          if [ -n "$GOOGLE_SERVICES_JSON_BASE64" ]; then
+            printf '%s' "$GOOGLE_SERVICES_JSON_BASE64" | base64 --decode > google-services.json
+            echo 'GOOGLE_SERVICES_FILE=./google-services.json' >> "$GITHUB_ENV"
+          fi
       - name: Build release-mode APK using public test signing key
         run: bash scripts/build-android.sh
       - uses: actions/upload-artifact@v6
@@ -101,7 +158,7 @@ jobs:
 
   ios:
     name: iPhone — UNSIGNED IPA (not directly installable)
-    needs: checks
+    needs: [checks, backend]
     if: ${{ inputs.platform == 'both' || inputs.platform == 'ios' }}
     runs-on: macos-26
     timeout-minutes: 90

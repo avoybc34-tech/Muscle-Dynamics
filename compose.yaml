@@ -1,0 +1,38 @@
+# Local/deployment integration configuration; inspect costs/security before hosting publicly.
+services:
+  db:
+    image: mariadb:11.8
+    environment:
+      MARIADB_DATABASE: muscle_dynamics
+      MARIADB_USER: muscle_app
+      MARIADB_PASSWORD: ${DB_PASSWORD:?Set DB_PASSWORD privately}
+      MARIADB_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:?Set DB_ROOT_PASSWORD privately}
+      MARIADB_ROOT_HOST: localhost
+    volumes: [mariadb:/var/lib/mysql]
+    healthcheck:
+      test: [CMD, healthcheck.sh, --connect, --innodb_initialized]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+    restart: unless-stopped
+  api:
+    build: ./backend
+    env_file: ./backend/.env
+    environment:
+      HOST: 0.0.0.0
+      PORT: 3000
+    ports: ["127.0.0.1:3000:3000"]
+    volumes: [receipts:/var/data/muscle-dynamics]
+    depends_on:
+      db: {condition: service_healthy}
+    restart: unless-stopped
+  worker:
+    build: ./backend
+    command: ["node", "src/worker.mjs"]
+    env_file: ./backend/.env
+    volumes: [receipts:/var/data/muscle-dynamics]
+    depends_on: [api]
+    restart: unless-stopped
+volumes:
+  mariadb:
+  receipts:

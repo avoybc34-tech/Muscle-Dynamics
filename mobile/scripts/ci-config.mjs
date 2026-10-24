@@ -1,2 +1,2 @@
-import {requireTestAcknowledgement} from './build-utils.mjs';
-try{if(process.env.GITHUB_ACTIONS==='true')requireTestAcknowledgement(process.env.ACK_TEST_BUILDS);console.log('Offline design preview. No backend URL, API or credentials required.');}catch(error){console.error(error.message);process.exitCode=1;}
+import {backendOrigin,requireTestAcknowledgement} from './build-utils.mjs';
+try{if(process.env.GITHUB_ACTIONS==='true')requireTestAcknowledgement(process.env.ACK_TEST_BUILDS);backendOrigin(process.env.EXPO_PUBLIC_API_URL||'');const id=process.env.EXPO_PUBLIC_EAS_PROJECT_ID||'';if(id&&!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id))throw Error('Expo project ID must be your actual UUID or blank.');console.log('Build configuration validated. Unconfigured live services are not simulated.');}catch(e){console.error(e.message);process.exitCode=1;}

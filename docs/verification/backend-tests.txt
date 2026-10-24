@@ -1,0 +1,168 @@
+Environment variables loaded from .env
+Prisma schema loaded from prisma/schema.prisma
+Datasource "db": MySQL database "muscle_dynamics_pro_test" at "127.0.0.1:3306"
+
+1 migration found in prisma/migrations
+
+Applying migration `202610240001_initial`
+
+The following migration(s) have been applied:
+
+migrations/
+  └─ 202610240001_initial/
+    └─ migration.sql
+      
+All migrations have been successfully applied.
+
+> muscle-dynamics-api@2.0.0 test
+> node --test tests/*.test.mjs
+
+TAP version 13
+# Subtest: active same-plan renewal extends exactly from existing expiry
+ok 1 - active same-plan renewal extends exactly from existing expiry
+  ---
+  duration_ms: 1.387777
+  type: 'test'
+  ...
+# Subtest: plan changes and expired membership restart on approval
+ok 2 - plan changes and expired membership restart on approval
+  ---
+  duration_ms: 0.208921
+  type: 'test'
+  ...
+# Subtest: expired status is computed accurately
+ok 3 - expired status is computed accurately
+  ---
+  duration_ms: 0.146378
+  type: 'test'
+  ...
+# Subtest: invalid plans and incomplete registration configuration are rejected
+ok 4 - invalid plans and incomplete registration configuration are rejected
+  ---
+  duration_ms: 2.655958
+  type: 'test'
+  ...
+# Subtest: push category/global preferences are enforced
+ok 5 - push category/global preferences are enforced
+  ---
+  duration_ms: 0.175665
+  type: 'test'
+  ...
+# Subtest: password hashing is salted and rejects incorrect passwords
+ok 6 - password hashing is salted and rejects incorrect passwords
+  ---
+  duration_ms: 198.932076
+  type: 'test'
+  ...
+# Subtest: real MariaDB API acceptance and security boundaries
+    # Subtest: private one-time owner setup and registration gating
+    ok 1 - private one-time owner setup and registration gating
+      ---
+      duration_ms: 276.911918
+      type: 'test'
+      ...
+    # Subtest: owner-only financial records and actual plan/account creation
+    ok 2 - owner-only financial records and actual plan/account creation
+      ---
+      duration_ms: 19.48522
+      type: 'test'
+      ...
+    # Subtest: private receipt + pending do not activate membership
+    ok 3 - private receipt + pending do not activate membership
+      ---
+      duration_ms: 46.663491
+      type: 'test'
+      ...
+    # Subtest: actual funds required and concurrent review activates exactly once
+    ok 4 - actual funds required and concurrent review activates exactly once
+      ---
+      duration_ms: 105.050779
+      type: 'test'
+      ...
+    # Subtest: renewal extends expiry and duplicate settled reference rolls back
+    ok 5 - renewal extends expiry and duplicate settled reference rolls back
+      ---
+      duration_ms: 399.985455
+      type: 'test'
+      ...
+    # Subtest: workout history is private; completed sessions cannot be rewritten
+    ok 6 - workout history is private; completed sessions cannot be rewritten
+      ---
+      duration_ms: 55.136015
+      type: 'test'
+      ...
+    # Subtest: profile, support and progress are isolated per user
+    ok 7 - profile, support and progress are isolated per user
+      ---
+      duration_ms: 30.274772
+      type: 'test'
+      ...
+    # Subtest: refresh token rotation invalidates replay and access expiry is enforced
+    ok 8 - refresh token rotation invalidates replay and access expiry is enforced
+      ---
+      duration_ms: 21.33452
+      type: 'test'
+      ...
+    # Subtest: class capacity and restricted staff financial boundaries
+    ok 9 - class capacity and restricted staff financial boundaries
+      ---
+      duration_ms: 85.995296
+      type: 'test'
+      ...
+    # Subtest: rejection never changes paid-through dates and unconfigured email fails honestly
+    ok 10 - rejection never changes paid-through dates and unconfigured email fails honestly
+      ---
+      duration_ms: 122.263904
+      type: 'test'
+      ...
+    # Subtest: payment and owner cursor pages preserve isolation and avoid duplicate rows
+    ok 11 - payment and owner cursor pages preserve isolation and avoid duplicate rows
+      ---
+      duration_ms: 31.946398
+      type: 'test'
+      ...
+    # Subtest: one-time password reset invalidates prior sessions
+    ok 12 - one-time password reset invalidates prior sessions
+      ---
+      duration_ms: 109.691232
+      type: 'test'
+      ...
+    # Subtest: push registration, reminder deduplication and mocked ticket creation
+    ok 13 - push registration, reminder deduplication and mocked ticket creation
+      ---
+      duration_ms: 80.443033
+      type: 'test'
+      ...
+    # Subtest: logout actually revokes the server session
+    ok 14 - logout actually revokes the server session
+      ---
+      duration_ms: 6.218585
+      type: 'test'
+      ...
+    1..14
+ok 7 - real MariaDB API acceptance and security boundaries
+  ---
+  duration_ms: 1556.855762
+  type: 'test'
+  ...
+# Subtest: membership reminders paginate beyond 500 and remain idempotent
+ok 8 - membership reminders paginate beyond 500 and remain idempotent
+  ---
+  duration_ms: 20.989783
+  type: 'test'
+  ...
+# Subtest: expiry compare-and-set cannot overwrite a concurrently renewed period
+ok 9 - expiry compare-and-set cannot overwrite a concurrently renewed period
+  ---
+  duration_ms: 0.542926
+  type: 'test'
+  ...
+1..9
+# tests 23
+# suites 0
+# pass 23
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 2426.401652

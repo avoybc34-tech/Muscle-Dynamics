@@ -1,11 +1,9 @@
-# Muscle Dynamics offline member-app preview
+# Muscle Dynamics mobile · 2.0
 
-Read the repository-root README for GitHub upload and build/download instructions. Keep this folder under the repository root; the workflow lives at `../.github/workflows/build.yml`.
+Connected Expo / React Native app with native auth stacks and Home, Workouts, Membership, Activity and Profile tabs. Start with the [repository README](../README.md) and [setup guide](../docs/SETUP.md).
 
-The app opens on a sample dashboard, with a permanent preview banner and screen browser. It needs no API, login, database, hosting or PC server. Sample interactions are in memory only and reset on restart. No real financial/personal data should be entered.
+Live mode requires the configured MariaDB API; it does not manufacture a sample paid member after errors. The explicit design demo is isolated and labelled. Native refresh credentials use SecureStore; the browser QA-only demo does not implement production web auth.
 
-Change `App.tsx` and `src/ui.tsx` to revise layouts/styles, or `src/preview.ts` to change clearly labelled example content. Commit changes and rerun the GitHub workflow for a new native build. There are no BAT/CMD launchers.
+GitHub browser-based test APK/unsigned IPA instructions: [GITHUB-BUILDS](../docs/GITHUB-BUILDS.md). No Windows launchers are supplied. No compiled binary is included here.
 
-Developer-only checks use the locked dependencies, `npm run check`, `npm run doctor`, and Expo's Android/iOS JS exports. End users need not install npm locally for the GitHub build path. Build scripts under `scripts/*.sh` run on GitHub's Linux/macOS runners, not on your PC.
-
-Unsigned IPA still requires separate valid signing/provisioning to install. The Android artifact is test-signed, not a production/store release. Review SECURITY.md and root VERIFICATION.md before distribution.
+Developer checks: `npm ci --include=dev`, `npm run check`, `npm run doctor`. Native compilation/device gates and the unresolved mobile audit findings are documented in [VERIFICATION](../docs/VERIFICATION.md) and [SECURITY](../docs/SECURITY.md).
